@@ -1,10 +1,10 @@
-#LibUJO Changelog
+#LibUJO-c Changelog
 
 Please check [https://github.com/tml21/libujo-c/commits](https://github.com/tml21/libujo-c/commits) for a detailed list of changes.
 
 ##Version 0.9.1##
 
-This is the initial version of libUJO. It's a starting point and not ready for productive applications.
+This is the initial version of libUJO-c. It's a starting point and not ready for productive applications.
 
 ### Credits ###
 

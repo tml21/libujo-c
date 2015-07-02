@@ -1,6 +1,6 @@
 # LibUJO Data Object Notation #
 
-**UJO Data Object Notation** is a binary data serialization format for the *Internet of Things* and *machine to machine (M2M)* applications. The name UJO is Esperanto and means container. It is designed for constraint devices, limited network bandwidth and speed. Binary data like images, videos or other multimedia files can be embedded without encoding. Many datatypes and different containers allow hierarchical data models and typesafe data transfer between different platforms, programming languages and databases.
+**UJO Data Object Notation** is a binary data serialization format for the *Internet of Things* and *machine to machine (M2M)* applications. The name UJO is Esperanto and means container. It is designed for constrained devices, limited network bandwidth and speed. Binary data like images, videos or other multimedia files can be embedded without encoding. Many data types and different containers allow hierarchical data models and typesafe data transfer between different platforms, programming languages and databases.
 
 ## Why UJO ? ##
 
@@ -20,7 +20,7 @@ For more information about the UJO document structure refer to the [specificatio
 
 ## How to get help ? ##
 
-The primary source of information is the [documentation of the library][3]. 
+The primary source of information is the [**reference manual**][3]. It includes the [**installation instruction**][10] for different platforms. 
 
 To discuss about UJO, ask questions, get help or receive news about releases, planned features and development progress, a [libujo mailing list][4] is available. [Subscribe][5] to the mailing list to get involved.
 
@@ -43,3 +43,4 @@ Many features are implemented, but some are missing to complete the first releas
   [7]: http://www.gnu.org/licenses/licenses.html#LGPL
   [8]: https://github.com/tml21/libujo-c/blob/master/LICENSE
   [9]: http://www.libujo.org/roadmap/
+  [10]: http://doc.libujo.org/libujo-c-html/md_ujo_install.html
