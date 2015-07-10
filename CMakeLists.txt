@@ -82,7 +82,7 @@ if (${UJO_TARGET_PLATFORM} STREQUAL linux_x86-32)
   add_subdirectory (./test  ${PROJECT}/test)
   
   set(CPACK_SET_DESTDIR ON)
-  set (CPACK_RESOURCE_FILE_LICENSE ../LICENSE)
+  set (CPACK_RESOURCE_FILE_LICENSE ../COPYING)
   include (CPack)
   
   set (PLATFORM_FOUND true)
@@ -96,7 +96,7 @@ if (${UJO_TARGET_PLATFORM} STREQUAL linux_x86-64)
   add_subdirectory (./test  ${PROJECT}/test)
   
   set(CPACK_SET_DESTDIR ON)
-  set (CPACK_RESOURCE_FILE_LICENSE ../LICENSE)
+  set (CPACK_RESOURCE_FILE_LICENSE ../COPYING)
   include (CPack)
   
   set (PLATFORM_FOUND true)
@@ -110,7 +110,7 @@ if (${UJO_TARGET_PLATFORM} STREQUAL osx_x86-32)
   add_subdirectory (./test  ${PROJECT}/test)
   
   set(CPACK_SET_DESTDIR ON)
-  set (CPACK_RESOURCE_FILE_LICENSE ../LICENSE)
+  set (CPACK_RESOURCE_FILE_LICENSE ../COPYING)
   include (CPack)
   
   set (PLATFORM_FOUND true)
@@ -124,7 +124,7 @@ if (${UJO_TARGET_PLATFORM} STREQUAL osx_x86-64)
   add_subdirectory (./test  ${PROJECT}/test)
   
   set(CPACK_SET_DESTDIR ON)
-  set (CPACK_RESOURCE_FILE_LICENSE ../LICENSE)
+  set (CPACK_RESOURCE_FILE_LICENSE ../COPYING)
   include (CPack)
   
   set (PLATFORM_FOUND true)
@@ -137,7 +137,7 @@ if (${UJO_TARGET_PLATFORM} STREQUAL android_arm32)
   add_subdirectory(./src  ${PROJECT}/libujo-c)
   
   set(CPACK_SET_DESTDIR ON)
-  set (CPACK_RESOURCE_FILE_LICENSE ../LICENSE)
+  set (CPACK_RESOURCE_FILE_LICENSE ../COPYING)
   include (CPack)
   
   set (PLATFORM_FOUND true)
@@ -151,7 +151,7 @@ if (${UJO_TARGET_PLATFORM} STREQUAL linux_arm32)
   add_subdirectory (./test  ${PROJECT}/test)
   
   set(CPACK_SET_DESTDIR ON)
-  set (CPACK_RESOURCE_FILE_LICENSE ../LICENSE)
+  set (CPACK_RESOURCE_FILE_LICENSE ../COPYING)
   include (CPack)
   
   set (PLATFORM_FOUND true)
