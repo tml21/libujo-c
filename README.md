@@ -36,11 +36,11 @@ Many features are implemented, but some are missing to complete the first releas
 
   [1]: http://www.libujo.org/info/
   [2]: http://www.libujo.org/specification/
-  [3]: http://www.libujo.org/doc/libujo-c-html/
+  [3]: http://www.libujo.org/docs/libujo-c-html/
   [4]: https://groups.google.com/forum/#!forum/libujo
   [5]: https://groups.google.com/forum/#!forum/libujo/join
   [6]: http://www.libujo.org/support/
   [7]: http://www.gnu.org/licenses/licenses.html#LGPL
   [8]: https://github.com/tml21/libujo-c/blob/master/LICENSE
   [9]: http://www.libujo.org/roadmap/
-  [10]: http://doc.libujo.org/libujo-c-html/md_ujo_install.html
+  [10]: http://www.libujo.org/docs/libujo-c-html/md_ujo_install.html
