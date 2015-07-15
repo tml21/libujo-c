@@ -94,19 +94,11 @@ struct _ujo_element {
 @endcond
 */
 
+/** 
+@cond INTERNAL_DOCS
+*/
 
-/**
- * @brief Create a new memory reader.
- *
- * The reader object provides functions to traverse UJO data
- * either in memory.
- * 
- * @param r    reference to a reader
- *
- * @return UJO error code or UJO_SUCCESS
- * @sa ujo_free_reader
- */
-ujoError ujo_new_memory_reader(ujo_reader** r)
+static __inline ujoError _ujo_new_reader(ujo_reader** r)
 {
 	ujo_reader*  newr;
 
@@ -114,7 +106,6 @@ ujoError ujo_new_memory_reader(ujo_reader** r)
 
 	report_error(newr, "allocation failed", UJO_ERR_ALLOCATION);
 	
-	newr->type = UJO_MEMORY; 
 	newr->state = (ujo_state*)ujo_new(ujo_state,1);
 	newr->state->state = STATE_ROOT;
 
@@ -124,7 +115,56 @@ ujoError ujo_new_memory_reader(ujo_reader** r)
 	*r = newr;
 
 	return UJO_SUCCESS;
+}
+
+/**
+@endcond
+*/
+
+/**
+ * @brief Create a new memory reader.
+ *
+ * The reader object provides functions to traverse UJO data
+ * from a memory buffer.
+ * 
+ * @param r    reference to a reader
+ *
+ * @return UJO error code or UJO_SUCCESS
+ * @sa ujo_free_reader
+ */
+ujoError ujo_new_memory_reader(ujo_reader** r)
+{
+	ujoError err;
+	ujo_reader*  newr;
+
+	err = _ujo_new_reader(&newr);
+	if (err != UJO_SUCCESS)
+	{
+		return err;
+	};
+	
+	newr->type = UJO_MEMORY;
+	*r = newr;
+
+	return UJO_SUCCESS;
 };
+
+/**
+ * @brief Create a new file reader.
+ *
+ * The reader object provides functions to traverse UJO data
+ * from a file.
+ * 
+ * @param r         reference to a reader
+ * @param filename  full path of the UJO file
+ *
+ * @return UJO error code or UJO_SUCCESS
+ * @sa ujo_free_reader
+ */ujoError ujo_new_file_reader(ujo_reader** r, wchar_t* filename)
+{
+	return UJO_ERR_NOT_IMPLEMENTED;
+}
+
 
 /**
  * @brief Set onElement callback.

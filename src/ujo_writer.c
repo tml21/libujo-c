@@ -49,6 +49,24 @@ struct _ujo_writer {
 	size_t			bytes;
 };
 
+static __inline ujoError _ujo_new_writer(ujo_writer** w)
+{
+	ujo_writer*     newhdl;
+
+	newhdl = (ujo_writer*)ujo_new(ujo_writer, 1); 
+	report_error(newhdl, "allocation failed", UJO_ERR_ALLOCATION);
+	
+	newhdl->state = (ujo_state*)ujo_new(ujo_state, 1);
+	newhdl->state->state = STATE_ROOT;
+
+	/* initialize stack */
+	newhdl->state_stack = ujo_new_stack(ujo_free);
+
+	*w = newhdl;
+
+	return UJO_SUCCESS;
+};
+
 /** 
 @endcond
 */
@@ -63,7 +81,7 @@ struct _ujo_writer {
  * @brief Create a new memory writer.
  *
  * The writer object provides functions to create UJO data
- * either in memory.
+ * in a memory buffer.
  * 
  * @param w    reference to a writer
  *
@@ -73,21 +91,15 @@ struct _ujo_writer {
 ujoError ujo_new_memory_writer(ujo_writer** w) 
 {
 	ujo_writer*     newhdl;
+	ujoError        err;
 
-	newhdl = (ujo_writer*)ujo_new(ujo_writer, 1); 
-	report_error(newhdl, "allocation failed", UJO_ERR_ALLOCATION);
-	
+	err = _ujo_new_writer(&newhdl);
+
 	newhdl->type = UJO_MEMORY; 
-
-	newhdl->state = (ujo_state*)ujo_new(ujo_state, 1);
-	newhdl->state->state = STATE_ROOT;
 
 	newhdl->bytes = 0;
 	newhdl->buffer = ujo_new(ujoByte, UJO_DEFAULT_BUFSIZE);
 	newhdl->buffersize = UJO_DEFAULT_BUFSIZE;
-
-	/* initialize stack */
-	newhdl->state_stack = ujo_new_stack(ujo_free);
 
 	_ujo_writer_buffer_put(newhdl, UJO_MAGIC, strlen(UJO_MAGIC));
 	_ujo_writer_buffer_set_uint16(newhdl, UJO_DATA_VERSION);
@@ -97,6 +109,23 @@ ujoError ujo_new_memory_writer(ujo_writer** w)
 
 	return UJO_SUCCESS;
 }
+
+/**
+ * @brief Create a new file writer.
+ *
+ * The writer object provides functions to create an UJO data
+ * file.
+ * 
+ * @param w         reference to a writer
+ * @param filename  path of the file
+ *
+ * @return UJO error code or UJO_SUCCESS
+ * @sa ujo_free_writer
+ */
+ujoError ujo_new_file_writer(ujo_writer** w, wchar_t* filename)
+{
+	return UJO_ERR_NOT_IMPLEMENTED;
+};
 
 /**
  * @brief Dispose a writer object.

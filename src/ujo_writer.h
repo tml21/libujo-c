@@ -41,6 +41,8 @@ BEGIN_C_DECLS
  */
 
 	ujoError ujo_new_memory_writer(ujo_writer** w);
+	ujoError ujo_new_file_writer(ujo_writer** w, wchar_t* filename);
+
 	ujoError ujo_free_writer(ujo_writer* w);
 
 	ujoError ujo_writer_get_type(ujo_writer* w, ujoAccessType* type);

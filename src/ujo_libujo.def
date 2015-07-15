@@ -1,6 +1,7 @@
 EXPORTS
 ujo_get_version
 ujo_new_memory_writer
+ujo_new_file_writer
 ujo_free_writer
 ujo_writer_get_buffer
 ujo_writer_get_type
@@ -30,6 +31,7 @@ ujo_writer_add_string_u8
 ujo_writer_add_string_u16
 ujo_writer_add_string_u32
 ujo_new_memory_reader
+ujo_new_file_reader
 ujo_free_reader
 ujo_reader_get_type
 ujo_reader_set_buffer
