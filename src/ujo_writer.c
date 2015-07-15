@@ -60,33 +60,24 @@ struct _ujo_writer {
 
 
 /**
- * @brief Create a new writer.
+ * @brief Create a new memory writer.
  *
  * The writer object provides functions to create UJO data
- * either in memory, as file or a stream.
+ * either in memory.
  * 
- * @param type writer type
  * @param w    reference to a writer
  *
  * @return UJO error code or UJO_SUCCESS
  * @sa ujo_free_writer
  */
-ujoError ujo_new_writer(ujoAccessType type, ujo_writer** w) 
+ujoError ujo_new_memory_writer(ujo_writer** w) 
 {
 	ujo_writer*     newhdl;
 
-	switch (type)
-	{
-	case UJO_MEMORY: 
-		newhdl = (ujo_writer*)ujo_new(ujo_writer, 1); 
-		break;
-	case UJO_FILE: report_error(0, "file writer is not yet implemented", UJO_ERR_NOT_IMPLEMENTED); break;
-	case UJO_STREAM: report_error(0, "stream writer is not yet implemented", UJO_ERR_NOT_IMPLEMENTED); break;
-	default: report_error(0, "invalid writer type", UJO_ERR_INVALID_DATA); break; 
-	}
+	newhdl = (ujo_writer*)ujo_new(ujo_writer, 1); 
 	report_error(newhdl, "allocation failed", UJO_ERR_ALLOCATION);
 	
-	newhdl->type = type; 
+	newhdl->type = UJO_MEMORY; 
 
 	newhdl->state = (ujo_state*)ujo_new(ujo_state, 1);
 	newhdl->state->state = STATE_ROOT;

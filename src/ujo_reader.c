@@ -96,33 +96,25 @@ struct _ujo_element {
 
 
 /**
- * @brief Create a new reader.
+ * @brief Create a new memory reader.
  *
  * The reader object provides functions to traverse UJO data
- * either in memory, from a file or a stream.
+ * either in memory.
  * 
- * @param type reader type
  * @param r    reference to a reader
  *
  * @return UJO error code or UJO_SUCCESS
  * @sa ujo_free_reader
  */
-ujoError ujo_new_reader(ujoAccessType type, ujo_reader** r)
+ujoError ujo_new_memory_reader(ujo_reader** r)
 {
 	ujo_reader*  newr;
 
-	switch (type)
-	{
-	case UJO_MEMORY: 
-		newr = (ujo_reader*)ujo_new(ujo_reader, 1); 
-		break;
-	case UJO_FILE: report_error(0, "file reader is not yet implemented", UJO_ERR_INVALID_DATA); break;
-	case UJO_STREAM: report_error(0, "stream reader is not yet implemented", UJO_ERR_INVALID_DATA); break;
-	default: report_error(0, "invalid reader type", UJO_ERR_INVALID_DATA); break; 
-	}
+	newr = (ujo_reader*)ujo_new(ujo_reader, 1); 
+
 	report_error(newr, "allocation failed", UJO_ERR_ALLOCATION);
 	
-	newr->type = type; 
+	newr->type = UJO_MEMORY; 
 	newr->state = (ujo_state*)ujo_new(ujo_state,1);
 	newr->state->state = STATE_ROOT;
 

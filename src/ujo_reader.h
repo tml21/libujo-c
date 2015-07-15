@@ -62,7 +62,8 @@ BEGIN_C_DECLS
  * @{
  */
 
-	ujoError ujo_new_reader(ujoAccessType type, ujo_reader** r);
+	ujoError ujo_new_memory_reader(ujo_reader** r);
+
 	ujoError ujo_free_reader(ujo_reader* r);
 
 	ujoError ujo_reader_get_type(ujo_reader* r, ujoAccessType* type);
