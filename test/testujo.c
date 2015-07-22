@@ -146,7 +146,10 @@ ujoBool test01()
 	print_return_ujo_err(err,"ujo_writer_list_open"); 
  
 	err = ujo_writer_add_int64(ujow, 12345678);
-	print_return_ujo_err(err,"ujo_writer_add_int64"); 
+	print_return_ujo_err(err,"ujo_writer_add_int64");
+
+	err = ujo_writer_add_float16(ujow, -9909.13414);
+	print_return_ujo_err(err,"ujo_writer_add_float16");
 
 	err = ujo_writer_add_float32(ujow, (float32_t)3.14);
 	print_return_ujo_err(err,"ujo_writer_add_float32"); 
@@ -229,6 +232,9 @@ ujoBool test01()
 				break;
 			case UJO_TYPE_NONE:
 				printf("None found\n");
+				break;
+			case UJO_TYPE_FLOAT16:
+				printf("float16 found\n");
 				break;
 			case UJO_TYPE_FLOAT32:
 				printf("float32 found\n");
@@ -1424,5 +1430,5 @@ int main(int argc, char **argv)
 			}
 		}
 	}
-};
+}
 
