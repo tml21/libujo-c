@@ -1260,6 +1260,9 @@ ujoBool test08()
 	err = ujo_writer_list_open(ujow);
 	print_return_ujo_err(err,"ujo_writer_list_open"); 
 
+	err = ujo_writer_add_float16(ujow, 4.13);
+	print_return_ujo_err(err,"ujo_writer_add_float16");
+
 	err = ujo_writer_add_float32(ujow, 3.14);
 	print_return_ujo_err(err,"ujo_writer_add_float32"); 
 
@@ -1279,7 +1282,7 @@ ujoBool test08()
 	bin_to_str(data, binstring, datasize);
 
 	printf("%s\n", binstring);
-	print_return_expr_fail(strcmp("5f554a4f0100003002c3f54840011f85eb51b81e094000",binstring) == 0,"float integrity failed");
+	print_return_expr_fail(strcmp("5f554a4f0100003003214402c3f54840011f85eb51b81e094000",binstring) == 0,"float integrity failed");
 	free(binstring);
 
 	err = ujo_free_writer(ujow);

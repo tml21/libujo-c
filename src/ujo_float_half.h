@@ -12,9 +12,9 @@ float16_t float_to_half(float f);
 
 float half_to_float(float16_t h);
 
-unsigned int convertmantissa(unsigned int i);
+//unsigned int convertmantissa(unsigned int i);
 
-void printBits(const size_t  size, void const * const ptr);
+//void printBits(const size_t  size, void const * const ptr);
 
 //void generatetables_float_to_half();
 

@@ -250,6 +250,8 @@ float16_t float_to_half(float val) {
 
 	//generatetables_float_to_half();
 
+
+
 	h=basetable[(f>>23)&0x1ff]+((f&0x007fffff)>>shifttable[(f>>23)&0x1ff]);
 
 	return h;
@@ -271,6 +273,8 @@ float half_to_float(float16_t h) {
 
 	return f32;
 }
+
+
 
 
 /*
@@ -356,6 +360,7 @@ void generatetables_half_to_float()
 }
 */
 
+/*
 void printBits(const size_t size, void const * const ptr)
 {
     unsigned char *b = (unsigned char*) ptr;
@@ -373,7 +378,9 @@ void printBits(const size_t size, void const * const ptr)
     }
     puts("");
 }
+*/
 
+/*
 
 unsigned int convertmantissa(unsigned int i){
 
@@ -390,9 +397,7 @@ unsigned int convertmantissa(unsigned int i){
 	e+=	0x38800000;			// Adjust bias ((127-14)<<23)
 	return m | e;			// Return combined number
 }
-
-
-
+*/
 
 
 
