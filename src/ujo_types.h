@@ -73,6 +73,8 @@ typedef enum {
  */
 typedef uint8_t ujoTypeId;
 
+typedef uint16_t float16_t;
+
 typedef float float32_t;
 
 typedef double float64_t;
