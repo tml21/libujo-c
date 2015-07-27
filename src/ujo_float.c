@@ -38,7 +38,7 @@
  */
 
 #include <stdio.h>
-#include "ujo_float_half.h"
+#include "ujo_float.h"
 
 static const uint16_t basetable[512] = {
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

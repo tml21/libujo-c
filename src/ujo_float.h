@@ -36,14 +36,16 @@
  *			Author: akristmann
  */
 
-#ifndef _UJO_FLOAT__HALF_H_
-#define _UJO_FLOAT__HALF_H_
+#ifndef _UJO_FLOAT_H_
+#define _UJO_FLOAT_H_
 
 #include <stddef.h>
-
 #include "ujo_types.h"
+#include "ujo_int.h"
 
 typedef uint16_t float16_t;
+typedef float float32_t;
+typedef double float64_t;
 
 BEGIN_C_DECLS
 

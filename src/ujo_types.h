@@ -28,7 +28,7 @@
 #define __UJO_TYPES_H__
 
 #include "ujo_decl.h"
-#include "ujo_int_types.h"
+#include "ujo_int.h"
 
 /**
  * @brief error type
@@ -72,10 +72,6 @@ typedef enum {
  * @brief UJO type id
  */
 typedef uint8_t ujoTypeId;
-
-typedef float float32_t;
-
-typedef double float64_t;
 
 /**
  * @brief UJO datetime
