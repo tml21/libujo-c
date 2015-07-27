@@ -26,7 +26,7 @@
 #ifndef __UJO_CONSTANTS_H__
 #define __UJO_CONSTANTS_H__
 
-#include "ujo_int_types.h"
+#include "ujo_int.h"
 
 /**
  * @brief API version number

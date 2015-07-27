@@ -29,7 +29,7 @@
 
 #include "ujo.h"
 #include "ujo_types.h"
-
+#include "ujo_float.h"
 
 typedef struct _ujo_writer ujo_writer;
 
