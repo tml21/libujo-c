@@ -27,7 +27,7 @@
 #ifndef __UJO_DECL_H__
 #define __UJO_DECL_H__
 
-#include "ujo_int_types.h"
+#include "ujo_int.h"
 
 
 /** 

@@ -22,70 +22,42 @@
  *  proprietary applications using this library without any royalty or
  *  fee but returning back any change, improvement or addition in the
  *  form of source code, project image, documentation patches, etc.
+ *
+ *  Homepage:
+ *    http://www.libujo.org
+ *
+ *  For professional support contact us:
+ *
+ *    wobe-systems GmbH
+ *    support@libujo.org
+ *
+ *  Contributers:
+ *		Created on: 02.07.2015
+ *			Author: akristmann
  */
 
-#ifndef __UJO_TYPES_H__
-#define __UJO_TYPES_H__
+#ifndef _UJO_FLOAT_H_
+#define _UJO_FLOAT_H_
 
-#include "ujo_decl.h"
+#include <stddef.h>
+#include "ujo_types.h"
 #include "ujo_int.h"
 
-/**
- * @brief error type
- */
-typedef uint32_t ujoError; 
+typedef uint16_t float16_t;
+typedef float float32_t;
+typedef double float64_t;
 
-typedef uint8_t ujoByte;
+BEGIN_C_DECLS
 
+float16_t float_to_half(float f);
 
-/**
- * @brief Bool definition for the UJO library. This type built on top
- * of <b>int</b> is used along with \ref ujoFalse and \ref ujoTrue
- * to model those API functions and attributes that returns or receive
- * a boolean state. 
- */
-typedef uint8_t ujoBool;
+float half_to_float(float16_t h);
 
-/** 
- * @brief Common definition to have false (\ref ujoFalse) value (which is defined to 0 integer value).
- */
-#define ujoFalse ((ujoBool)0)
-/** 
- * @brief Common definition to have true (\ref ujoTrue) value (which is defined to 1 integer value).
- */
-#define ujoTrue  ((ujoBool)1)
+int isinf(float32_t x);
 
-/**
- * @brief access type.
- * @ingroup ujo_reader
- */
-typedef enum { 
-	/** file access */
-	UJO_FILE    = 0x100, 
-	/** memory access */
-	UJO_MEMORY  = 0x101,
-	/** stream access */
-	UJO_STREAM  = 0x102, 
-} ujoAccessType; 
-
-/**
- * @brief UJO type id
- */
-typedef uint8_t ujoTypeId;
-
-/**
- * @brief UJO datetime
- */
-typedef struct {
-	int16_t year;
-	uint8_t month;
-	uint8_t day;
-	uint8_t hour;
-	uint8_t minute;
-	uint8_t second;
-	uint16_t millisecond;
-} ujoDateTime;
+int isnan(float32_t x);
 
 
+END_C_DECLS
 
 #endif

@@ -29,6 +29,7 @@
 
 #include "ujo_decl.h"
 #include "ujo_types.h"
+#include "ujo_float.h"
 
 
 /**

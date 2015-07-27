@@ -24,8 +24,8 @@
  *  form of source code, project image, documentation patches, etc.
  */
 
-#ifndef __UJO_INT_TYPES_H__
-#define __UJO_INT_TYPES_H__
+#ifndef __UJO_INT_H__
+#define __UJO_INT_H__
 
 #ifdef LINUX
 #include <stdint.h>

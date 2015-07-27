@@ -26,14 +26,14 @@
 
 #include "ujo_reader.h"
 #include "ujo_stack.h"
-#include "ujo_int_types.h"
+#include "ujo_int.h"
 #include "ujo_errors.h"
 #include "ujo_macros.h"
 #include "ujo_log.h"
 #include "string.h"
 #include "ujo_constants.h"
 #include "ujo_state.h"
-#include "ujo_float_half.h"
+#include "ujo_float.h"
 
 /** 
 @cond INTERNAL_DOCS

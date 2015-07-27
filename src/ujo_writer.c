@@ -31,9 +31,7 @@
 #include "ujo_constants.h"
 #include "ujo_macros.h"
 #include "ujo_state.h"
-#include "ujo_float_half.h"
-#include <math.h>
-#include <stdlib.h>
+#include "ujo_float.h"
 #include <assert.h>
 #include <string.h>
 
@@ -458,13 +456,11 @@ ujoError ujo_writer_add_null(ujo_writer* w, ujoTypeId type)
  */
 ujoError ujo_writer_add_float16(ujo_writer* w, float32_t value)
 {
-	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
-
 	float16_t hValue = float_to_half(value);
 
-	int checkFinite = isinff(half_to_float(hValue));
+	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	if (checkFinite != 0)
+	if (isinf(half_to_float(hValue)) != 0)
 	{
 		report_error(0,"value is out of range", UJO_ERR_INVALID_DATA);
 	}

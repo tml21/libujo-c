@@ -34,7 +34,7 @@ set  (UJO_SOURCES_HEADER
       "ujo.h"
       "ujo_decl.h"
       "ujo_writer.h"
-      "ujo_int_types.h"
+      "ujo_int.h"
       "ujo_errors.h"	
       "ujo_log.h"
       "ujo_stack.h"
@@ -44,7 +44,7 @@ set  (UJO_SOURCES_HEADER
       "ujo_macros.h"
       "ujo_reader.h"
       "ujo_state.h"
-	  "ujo_float_half.h")
+  	  "ujo_float.h")
 
 set  (UJO_SOURCES
 	  "ujo.c"
@@ -55,8 +55,8 @@ set  (UJO_SOURCES
       "ujo_types.c"
       "ujo_reader.c"
       "ujo_state.c"
-	  "ujo_float_half.c"
-	  "ujo_libujo.def")
+  	  "ujo_float.c"
+	    "ujo_libujo.def")
 
 source_group("Headerfiles" FILES ${UJO_SOURCES_HEADER})
 source_group("Sourcefiles" FILES ${UJO_SOURCES})

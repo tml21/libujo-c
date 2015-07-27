@@ -1,12 +1,44 @@
-/*
- * hfloat_t.c
+/* 
+ *  LibUjo:  An UJO binaray data object notation library.
+ *  Copyright (c) 2015 by wobe-systems GmbH
  *
- *  Created on: 02.07.2015
- *      Author: akristmann
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public License
+ *  as published by the Free Software Foundation; either version 2.1
+ *  of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this program; if not, write to the Free
+ *  Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+ *  02111-1307 USA
+ *  
+ *  You may find a copy of the license under this software is released
+ *  at COPYING file. This is LGPL software: you are welcome to develop
+ *  proprietary applications using this library without any royalty or
+ *  fee but returning back any change, improvement or addition in the
+ *  form of source code, project image, documentation patches, etc.
+ *
+ *  Homepage:
+ *    http://www.libujo.org
+ *
+ *  For professional support contact us:
+ *
+ *    wobe-systems GmbH
+ *    support@libujo.org
+ *
+ *  Contributers:
+ *		Created on: 02.07.2015
+ *			Author: akristmann
+ *
  */
 
 #include <stdio.h>
-#include "ujo_float_half.h"
+#include "ujo_float.h"
 
 static const uint16_t basetable[512] = {
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -248,10 +280,6 @@ float16_t float_to_half(float val) {
 	uint16_t h = 0;
 	uint32_t f =  (*(uint32_t *) &val);
 
-	//generatetables_float_to_half();
-
-
-
 	h=basetable[(f>>23)&0x1ff]+((f&0x007fffff)>>shifttable[(f>>23)&0x1ff]);
 
 	return h;
@@ -264,8 +292,6 @@ float half_to_float(float16_t h) {
 
 	f = (*(uint32_t *) &h);
 
-	//generatetables_half_to_float();
-
 	f = mantissatable[offsettable[h>>10]+(h&0x3ff)]+exponenttable[h>>10];
 
 	f32 = (*(float *) &f);
@@ -274,131 +300,21 @@ float half_to_float(float16_t h) {
 	return f32;
 }
 
-
-
-
-/*
-void generatetables_float_to_half(){
-  unsigned int i;
-  int e;
-  for(i=0; i<256; ++i){
-    e=i-127;
-    if(e<-24){                  // Very small numbers map to zero
-      basetable[i|0x000]=0x0000;
-      basetable[i|0x100]=0x8000;
-      shifttable[i|0x000]=24;
-      shifttable[i|0x100]=24;
-    }
-    else if(e<-14){             // Small numbers map to denorms
-      basetable[i|0x000]=(0x0400>>(-e-14));
-      basetable[i|0x100]=(0x0400>>(-e-14)) | 0x8000;
-      shifttable[i|0x000]=-e-1;
-      shifttable[i|0x100]=-e-1;
-    }
-    else if(e<=15){             // Normal numbers just lose precision
-      basetable[i|0x000]=((e+15)<<10);
-      basetable[i|0x100]=((e+15)<<10) | 0x8000;
-      shifttable[i|0x000]=13;
-      shifttable[i|0x100]=13;
-    }
-    else if(e<128){             // Large numbers map to Infinity
-      basetable[i|0x000]=0x7C00;
-      basetable[i|0x100]=0xFC00;
-      shifttable[i|0x000]=24;
-      shifttable[i|0x100]=24;
-    }
-    else{                       // Infinity and NaN's stay Infinity and NaN's
-      basetable[i|0x000]=0x7C00;
-      basetable[i|0x100]=0xFC00;
-      shifttable[i|0x000]=13;
-      shifttable[i|0x100]=13;
-    }
-  }
-}
-
-void generatetables_half_to_float()
+int isinf(float32_t x)
 {
-	int i = 0;
-
-	mantissatable[0] = 0;
-
-	for(i = 1; i <= 1023; i++)
-	{
-		mantissatable[i] = convertmantissa(i);
-	}
-
-	for(i = 1024; i <= 2047; i++)
-	{
-		mantissatable[i] = 0x38000000 + ((i-1024)<<13);
-	}
-
-
-	exponenttable[0] = 0;
-
-	for(i = 1; i <= 30; i++)
-	{
-		exponenttable[i] = i<<23;
-	}
-
-	exponenttable[31] = 0x47800000;
-	exponenttable[32] = 0x80000000;
-
-	for(i = 33; i <= 62; i++)
-	{
-		exponenttable[i] = 0x80000000 + ((i-32)<<23);
-	}
-	exponenttable[63]= 0xC7800000;
-
-
-	for(i = 0; i <= 63; i++)
-	{
-		offsettable[i] = 1024;
-	}
-
-	offsettable[0] = 0;
-	offsettable[32] = 0;
+    union { uint64_t u; float32_t f; } ieee754;
+    ieee754.f = x;
+    return ( (unsigned)(ieee754.u >> 32) & 0x7fffffff ) == 0x7ff00000 &&
+           ( (unsigned)ieee754.u == 0 );
 }
-*/
 
-/*
-void printBits(const size_t size, void const * const ptr)
+int isnan(float32_t x)
 {
-    unsigned char *b = (unsigned char*) ptr;
-    unsigned char byte;
-    int i, j;
-
-    for (i=size-1;i>=0;i--)
-    {
-        for (j=7;j>=0;j--)
-        {
-            byte = b[i] & (1<<j);
-            byte >>= j;
-            printf("%u", byte);
-        }
-    }
-    puts("");
+    union { uint64_t u; float32_t f; } ieee754;
+    ieee754.f = x;
+    return ( (unsigned)(ieee754.u >> 32) & 0x7fffffff ) +
+           ( (unsigned)ieee754.u != 0 ) > 0x7ff00000;
 }
-*/
-
-/*
-
-unsigned int convertmantissa(unsigned int i){
-
-	unsigned int m=i<<13; 	// Zero pad mantissa bits
-	unsigned int e=0;		// Zero exponent
-
-	while(!(m&0x00800000))	// While not normalized
-	{
-		e-=0x00800000;		// Decrement exponent (1<<23)
-		m<<=1;				// Shift mantissa
-	}
-
-	m&=~0x00800000; 		// Clear leading 1 bit
-	e+=	0x38800000;			// Adjust bias ((127-14)<<23)
-	return m | e;			// Return combined number
-}
-*/
-
 
 
 
