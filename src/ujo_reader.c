@@ -33,6 +33,7 @@
 #include "string.h"
 #include "ujo_constants.h"
 #include "ujo_state.h"
+#include "ujo_float_half.h"
 
 /** 
 @cond INTERNAL_DOCS
@@ -63,6 +64,7 @@ struct _ujo_element {
 		uint32_t uint32val;
 		uint64_t uint64val;
 
+		float16_t float16val;
 		float32_t float32val;
 		float64_t float64val;
 
@@ -328,6 +330,14 @@ static __inline ujoError _ujo_reader_parse_uint16(ujo_reader *r, ujo_element *v)
 static __inline ujoError _ujo_reader_parse_uint8(ujo_reader *r, ujo_element *v)
 {
 	_ujo_reader_buffer_read(r,&(v->uint8val), sizeof(uint8_t));
+	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
+
+	return UJO_SUCCESS;
+};
+
+static __inline ujoError _ujo_reader_parse_float16(ujo_reader *r, ujo_element *v)
+{
+	_ujo_reader_buffer_read(r,&(v->float16val), sizeof(float16_t));
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -639,6 +649,8 @@ ujoError ujo_reader_get_next(ujo_reader *r, ujo_element** v, ujoBool *eod)
 		err = _ujo_reader_parse_uint16(r, value); break;
 	case UJO_TYPE_UINT8: 
 		err = _ujo_reader_parse_uint8(r, value); break;
+	case UJO_TYPE_FLOAT16:
+		err = _ujo_reader_parse_float16(r, value); break;
 	case UJO_TYPE_FLOAT32: 
 		err = _ujo_reader_parse_float32(r, value); break;
 	case UJO_TYPE_FLOAT64: 
@@ -878,7 +890,7 @@ ujoError ujo_element_get_uint64(ujo_element* e, uint64_t* value)
 /**
  * @brief Get a 16bit float value (half precision)
  *
- * If the element is of UJO_TYPE_FLOAT316, this function is used
+ * If the element is of UJO_TYPE_FLOAT16, this function is used
  * to retrieve the value. C does not support half precision values.
  * The function converts to single precision automatically. 
  *
@@ -890,7 +902,11 @@ ujoError ujo_element_get_uint64(ujo_element* e, uint64_t* value)
  */
 ujoError ujo_element_get_float16(ujo_element* e, float32_t* value)
 {
-	return UJO_ERR_NOT_IMPLEMENTED;
+	report_error(e, "invalid handle", UJO_ERR_INVALID_DATA);
+	report_error(e->type == UJO_TYPE_FLOAT16, "element type mismatch", UJO_ERR_INVALID_DATA);
+
+	*value = half_to_float(e->float16val);
+	return UJO_SUCCESS;
 };
 
 /**

@@ -43,7 +43,8 @@ set  (UJO_SOURCES_HEADER
       "ujo_constants.h"
       "ujo_macros.h"
       "ujo_reader.h"
-      "ujo_state.h")
+      "ujo_state.h"
+	  "ujo_float_half.h")
 
 set  (UJO_SOURCES
 	  "ujo.c"
@@ -54,6 +55,7 @@ set  (UJO_SOURCES
       "ujo_types.c"
       "ujo_reader.c"
       "ujo_state.c"
+	  "ujo_float_half.c"
 	  "ujo_libujo.def")
 
 source_group("Headerfiles" FILES ${UJO_SOURCES_HEADER})
