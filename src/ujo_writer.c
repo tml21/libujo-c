@@ -34,6 +34,7 @@
 #include "ujo_float.h"
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 
 
 /** 
@@ -45,9 +46,13 @@ struct _ujo_writer {
 	ujoStack*		state_stack;
 	ujo_state*		state;
     
+	// memory writer
 	size_t			buffersize;
 	ujoByte*		buffer;
 	size_t			bytes;
+
+	// file writer
+	FILE*           file;
 };
 
 static __inline ujoError _ujo_new_writer(ujo_writer** w)
@@ -94,7 +99,7 @@ ujoError ujo_new_memory_writer(ujo_writer** w)
 	ujo_writer*     newhdl;
 	ujoError        err;
 
-	err = _ujo_new_writer(&newhdl);
+	return_on_err(_ujo_new_writer(&newhdl));
 
 	newhdl->type = UJO_MEMORY; 
 
@@ -102,9 +107,9 @@ ujoError ujo_new_memory_writer(ujo_writer** w)
 	newhdl->buffer = ujo_new(ujoByte, UJO_DEFAULT_BUFSIZE);
 	newhdl->buffersize = UJO_DEFAULT_BUFSIZE;
 
-	_ujo_writer_buffer_put(newhdl, UJO_MAGIC, strlen(UJO_MAGIC));
-	_ujo_writer_buffer_set_uint16(newhdl, UJO_DATA_VERSION);
-	_ujo_writer_buffer_set_uint8(newhdl, UJO_COMPRESS_NONE);
+	return_on_err(_ujo_writer_put(newhdl, UJO_MAGIC, strlen(UJO_MAGIC)));
+	return_on_err(_ujo_writer_put_uint16(newhdl, UJO_DATA_VERSION));
+	return_on_err(_ujo_writer_put_uint8(newhdl, UJO_COMPRESS_NONE));
 
 	*w = newhdl;
 
@@ -123,9 +128,27 @@ ujoError ujo_new_memory_writer(ujo_writer** w)
  * @return UJO error code or UJO_SUCCESS
  * @sa ujo_free_writer
  */
-ujoError ujo_new_file_writer(ujo_writer** w, wchar_t* filename)
+ujoError ujo_new_file_writer(ujo_writer** w, const char* filename)
 {
-	return UJO_ERR_NOT_IMPLEMENTED;
+	ujo_writer*     newhdl;
+	ujoError        err;
+	FILE*           filehandle;
+
+	filehandle = fopen(filename, "wb"); // windows call with unicode support
+    report_error(filehandle != NULL, "cannot open file", UJO_ERR_FILE);	
+
+	return_on_err(_ujo_new_writer(&newhdl));
+
+	newhdl->type = UJO_FILE; 
+	newhdl-> file = filehandle;
+
+	return_on_err(_ujo_writer_put(newhdl, UJO_MAGIC, strlen(UJO_MAGIC)));
+	return_on_err(_ujo_writer_put_uint16(newhdl, UJO_DATA_VERSION));
+	return_on_err(_ujo_writer_put_uint8(newhdl, UJO_COMPRESS_NONE));
+
+	*w = newhdl;
+
+	return UJO_SUCCESS;
 };
 
 /**
@@ -144,8 +167,17 @@ ujoError ujo_free_writer(ujo_writer* w)
 	report_error(w, "invalid writer handle", UJO_ERR_INVALID_DATA);	
 	
 	ujo_free_stack(w->state_stack);
-	ujo_free(w->buffer);
 	ujo_free(w->state);
+	
+	switch(w->type) {
+	case UJO_MEMORY:
+		ujo_free(w->buffer);
+		break;
+	case UJO_FILE:
+		fclose(w->file);
+		break;
+	}
+
 	ujo_free(w);
 
 	return UJO_SUCCESS;
@@ -212,7 +244,7 @@ ujoError ujo_writer_list_open(ujo_writer* w)
 	report_error(ujo_state_allow_container(w->state->state),"list not allowed", UJO_ERR_TYPE_MISPLACED);
 
 	w->state = ujo_state_next(STATE_LIST, w->state, w->state_stack);
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_LIST);
+	_ujo_writer_put_uint8(w, UJO_TYPE_LIST);
 
 	return UJO_SUCCESS;
 };
@@ -233,7 +265,7 @@ ujoError ujo_writer_list_close(ujo_writer* w)
 	report_error(w->state->state==STATE_LIST,"close list not allowed", UJO_ERR_INVALID_OBJECT);
 	
 	w->state = ujo_state_prev(w->state, w->state_stack);
-	_ujo_writer_buffer_set_uint8(w, UJO_TERMINATOR);
+	_ujo_writer_put_uint8(w, UJO_TERMINATOR);
 
 	w->state = ujo_state_switch(CONTAINER_CLOSED, w->state, w->state_stack);
 
@@ -268,7 +300,7 @@ ujoError ujo_writer_map_open(ujo_writer* w)
 	report_error(ujo_state_allow_container(w->state->state),"map not allowed", UJO_ERR_TYPE_MISPLACED);
 
 	w->state = ujo_state_next(STATE_DICT_KEY, w->state, w->state_stack);
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_MAP);
+	_ujo_writer_put_uint8(w, UJO_TYPE_MAP);
 
 	return UJO_SUCCESS;
 };
@@ -289,7 +321,7 @@ ujoError ujo_writer_map_close(ujo_writer* w)
 	report_error(w->state->state==STATE_DICT_KEY,"close map not allowed", UJO_ERR_INVALID_OBJECT);
 	
 	w->state = ujo_state_prev(w->state, w->state_stack);
-	_ujo_writer_buffer_set_uint8(w, UJO_TERMINATOR);
+	_ujo_writer_put_uint8(w, UJO_TERMINATOR);
 
     w->state = ujo_state_switch(CONTAINER_CLOSED, w->state, w->state_stack);
 
@@ -312,8 +344,8 @@ ujoError ujo_writer_add_int64(ujo_writer* w, int64_t value)
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_INT64);
-	_ujo_writer_buffer_put(w, &value, sizeof(int64_t));
+	_ujo_writer_put_uint8(w, UJO_TYPE_INT64);
+	_ujo_writer_put(w, &value, sizeof(int64_t));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -336,8 +368,8 @@ ujoError ujo_writer_add_int32(ujo_writer* w, int32_t value)
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_INT32);
-	_ujo_writer_buffer_put(w, &value, sizeof(int32_t));
+	_ujo_writer_put_uint8(w, UJO_TYPE_INT32);
+	_ujo_writer_put(w, &value, sizeof(int32_t));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -360,8 +392,8 @@ ujoError ujo_writer_add_int16(ujo_writer* w, int16_t value)
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_INT16);
-	_ujo_writer_buffer_put(w, &value, sizeof(int16_t));
+	_ujo_writer_put_uint8(w, UJO_TYPE_INT16);
+	_ujo_writer_put(w, &value, sizeof(int16_t));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -384,8 +416,8 @@ ujoError ujo_writer_add_int8(ujo_writer* w, int8_t value)
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_INT8);
-	_ujo_writer_buffer_put(w, &value, sizeof(int8_t));
+	_ujo_writer_put_uint8(w, UJO_TYPE_INT8);
+	_ujo_writer_put(w, &value, sizeof(int8_t));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -406,7 +438,7 @@ ujoError ujo_writer_add_int8(ujo_writer* w, int8_t value)
 ujoError ujo_writer_add_none(ujo_writer* w)
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_NONE);
+	_ujo_writer_put_uint8(w, UJO_TYPE_NONE);
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -432,7 +464,7 @@ ujoError ujo_writer_add_null(ujo_writer* w, ujoTypeId type)
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, type & 0x80);
+	_ujo_writer_put_uint8(w, type & 0x80);
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -465,8 +497,8 @@ ujoError ujo_writer_add_float16(ujo_writer* w, float32_t value)
 		report_error(0,"value is out of range", UJO_ERR_INVALID_DATA);
 	}
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_FLOAT16);
-	_ujo_writer_buffer_put(w, &hValue, sizeof(float16_t));
+	_ujo_writer_put_uint8(w, UJO_TYPE_FLOAT16);
+	_ujo_writer_put(w, &hValue, sizeof(float16_t));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -489,8 +521,8 @@ ujoError ujo_writer_add_float32(ujo_writer* w, float32_t value)
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_FLOAT32);
-	_ujo_writer_buffer_put(w, &value, sizeof(float32_t));
+	_ujo_writer_put_uint8(w, UJO_TYPE_FLOAT32);
+	_ujo_writer_put(w, &value, sizeof(float32_t));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -513,8 +545,8 @@ ujoError ujo_writer_add_float64(ujo_writer* w, float64_t value)
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_FLOAT64);
-	_ujo_writer_buffer_put(w, &value, sizeof(float64_t));
+	_ujo_writer_put_uint8(w, UJO_TYPE_FLOAT64);
+	_ujo_writer_put(w, &value, sizeof(float64_t));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -535,8 +567,8 @@ ujoError ujo_writer_add_bool(ujo_writer* w, ujoBool value)
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_BOOL);
-	_ujo_writer_buffer_put(w, &value, sizeof(ujoBool));
+	_ujo_writer_put_uint8(w, UJO_TYPE_BOOL);
+	_ujo_writer_put(w, &value, sizeof(ujoBool));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -559,8 +591,8 @@ ujoError ujo_writer_add_uint64(ujo_writer* w, uint64_t value)
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_UINT64);
-	_ujo_writer_buffer_put(w, &value, sizeof(uint64_t));
+	_ujo_writer_put_uint8(w, UJO_TYPE_UINT64);
+	_ujo_writer_put(w, &value, sizeof(uint64_t));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -583,8 +615,8 @@ ujoError ujo_writer_add_uint32(ujo_writer* w, uint32_t value)
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_UINT32);
-	_ujo_writer_buffer_put(w, &value, sizeof(uint32_t));
+	_ujo_writer_put_uint8(w, UJO_TYPE_UINT32);
+	_ujo_writer_put(w, &value, sizeof(uint32_t));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -607,8 +639,8 @@ ujoError ujo_writer_add_uint16(ujo_writer* w, uint16_t value)
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_UINT16);
-	_ujo_writer_buffer_put(w, &value, sizeof(uint16_t));
+	_ujo_writer_put_uint8(w, UJO_TYPE_UINT16);
+	_ujo_writer_put(w, &value, sizeof(uint16_t));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -631,8 +663,8 @@ ujoError ujo_writer_add_uint8(ujo_writer* w, uint8_t value)
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_UINT8);
-	_ujo_writer_buffer_put(w, &value, sizeof(uint8_t));
+	_ujo_writer_put_uint8(w, UJO_TYPE_UINT8);
+	_ujo_writer_put(w, &value, sizeof(uint8_t));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -657,8 +689,8 @@ ujoError ujo_writer_add_uxtime(ujo_writer* w, int64_t t)
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_UX_TIME);
-	_ujo_writer_buffer_put(w, &t, sizeof(int64_t));
+	_ujo_writer_put_uint8(w, UJO_TYPE_UX_TIME);
+	_ujo_writer_put(w, &t, sizeof(int64_t));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -681,10 +713,10 @@ ujoError ujo_writer_add_date(ujo_writer* w, const ujoDateTime dt)
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_DATE);
-	_ujo_writer_buffer_put(w, &dt.year, sizeof(int16_t));
-	_ujo_writer_buffer_put(w, &dt.month, sizeof(uint8_t));
-	_ujo_writer_buffer_put(w, &dt.day, sizeof(uint8_t));
+	_ujo_writer_put_uint8(w, UJO_TYPE_DATE);
+	_ujo_writer_put(w, &dt.year, sizeof(int16_t));
+	_ujo_writer_put(w, &dt.month, sizeof(uint8_t));
+	_ujo_writer_put(w, &dt.day, sizeof(uint8_t));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -708,10 +740,10 @@ ujoError ujo_writer_add_time(ujo_writer* w, const ujoDateTime dt)
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_TIME);
-	_ujo_writer_buffer_put(w, &dt.hour, sizeof(uint8_t));
-	_ujo_writer_buffer_put(w, &dt.minute, sizeof(uint8_t));
-	_ujo_writer_buffer_put(w, &dt.second, sizeof(uint8_t));
+	_ujo_writer_put_uint8(w, UJO_TYPE_TIME);
+	_ujo_writer_put(w, &dt.hour, sizeof(uint8_t));
+	_ujo_writer_put(w, &dt.minute, sizeof(uint8_t));
+	_ujo_writer_put(w, &dt.second, sizeof(uint8_t));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -736,17 +768,17 @@ ujoError ujo_writer_add_timestamp(ujo_writer* w, const ujoDateTime dt)
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_TIMESTAMP);
+	_ujo_writer_put_uint8(w, UJO_TYPE_TIMESTAMP);
 
-	_ujo_writer_buffer_put(w, &dt.year, sizeof(int16_t));
-	_ujo_writer_buffer_put(w, &dt.month, sizeof(uint8_t));
-	_ujo_writer_buffer_put(w, &dt.day, sizeof(uint8_t));
+	_ujo_writer_put(w, &dt.year, sizeof(int16_t));
+	_ujo_writer_put(w, &dt.month, sizeof(uint8_t));
+	_ujo_writer_put(w, &dt.day, sizeof(uint8_t));
 
-	_ujo_writer_buffer_put(w, &dt.hour, sizeof(uint8_t));
-	_ujo_writer_buffer_put(w, &dt.minute, sizeof(uint8_t));
-	_ujo_writer_buffer_put(w, &dt.second, sizeof(uint8_t));
+	_ujo_writer_put(w, &dt.hour, sizeof(uint8_t));
+	_ujo_writer_put(w, &dt.minute, sizeof(uint8_t));
+	_ujo_writer_put(w, &dt.second, sizeof(uint8_t));
 
-	_ujo_writer_buffer_put(w, &dt.millisecond, sizeof(uint16_t));
+	_ujo_writer_put(w, &dt.millisecond, sizeof(uint16_t));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -772,11 +804,11 @@ ujoError ujo_writer_add_string_c(ujo_writer* w, const char* s)
 
 	report_error(ujo_state_allow_string(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_STRING);
-	_ujo_writer_buffer_set_uint8(w, UJO_SUB_STRING_C);
+	_ujo_writer_put_uint8(w, UJO_TYPE_STRING);
+	_ujo_writer_put_uint8(w, UJO_SUB_STRING_C);
 
-	_ujo_writer_buffer_put(w, &units, sizeof(uint32_t));
-	_ujo_writer_buffer_put(w, s, units);
+	_ujo_writer_put(w, &units, sizeof(uint32_t));
+	_ujo_writer_put(w, s, units);
 
 	w->state = ujo_state_switch(STRING_FOUND, w->state, w->state_stack);
 
@@ -803,11 +835,11 @@ ujoError ujo_writer_add_string_u8(ujo_writer* w, const uint8_t* s, size_t n)
 	uint32_t units = (uint32_t)n;
 	report_error(ujo_state_allow_string(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_STRING);
-	_ujo_writer_buffer_set_uint8(w, UJO_SUB_STRING_U8);
+	_ujo_writer_put_uint8(w, UJO_TYPE_STRING);
+	_ujo_writer_put_uint8(w, UJO_SUB_STRING_U8);
 
-	_ujo_writer_buffer_put(w, &units, sizeof(uint32_t));
-	_ujo_writer_buffer_put(w, s, n);
+	_ujo_writer_put(w, &units, sizeof(uint32_t));
+	_ujo_writer_put(w, s, n);
 
 	w->state = ujo_state_switch(STRING_FOUND, w->state, w->state_stack);
 
@@ -834,11 +866,11 @@ ujoError ujo_writer_add_string_u16(ujo_writer* w, const uint16_t* s, size_t n)
 
 	report_error(ujo_state_allow_string(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_STRING);
-	_ujo_writer_buffer_set_uint8(w, UJO_SUB_STRING_U16);
+	_ujo_writer_put_uint8(w, UJO_TYPE_STRING);
+	_ujo_writer_put_uint8(w, UJO_SUB_STRING_U16);
 
-	_ujo_writer_buffer_put(w, &units, sizeof(uint32_t));
-	_ujo_writer_buffer_put(w, s, n*sizeof(uint16_t));
+	_ujo_writer_put(w, &units, sizeof(uint32_t));
+	_ujo_writer_put(w, s, n*sizeof(uint16_t));
 
 	w->state = ujo_state_switch(STRING_FOUND, w->state, w->state_stack);
 
@@ -865,11 +897,11 @@ ujoError ujo_writer_add_string_u32(ujo_writer* w, const uint32_t* s, size_t n)
 
 	report_error(ujo_state_allow_string(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_STRING);
-	_ujo_writer_buffer_set_uint8(w, UJO_SUB_STRING_U32);
+	_ujo_writer_put_uint8(w, UJO_TYPE_STRING);
+	_ujo_writer_put_uint8(w, UJO_SUB_STRING_U32);
 
-	_ujo_writer_buffer_put(w, &units, sizeof(uint32_t));
-	_ujo_writer_buffer_put(w, s, n*sizeof(uint32_t));
+	_ujo_writer_put(w, &units, sizeof(uint32_t));
+	_ujo_writer_put(w, s, n*sizeof(uint32_t));
 
 	w->state = ujo_state_switch(STRING_FOUND, w->state, w->state_stack);
 
@@ -896,11 +928,11 @@ ujoError ujo_writer_add_binary(ujo_writer* w, uint8_t t, const uint8_t* d, uint3
 {
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_BIN);
-	_ujo_writer_buffer_set_uint8(w, t);
+	_ujo_writer_put_uint8(w, UJO_TYPE_BIN);
+	_ujo_writer_put_uint8(w, t);
 
-	_ujo_writer_buffer_put(w, &n, sizeof(uint32_t));
-	_ujo_writer_buffer_put(w, d, n);
+	_ujo_writer_put(w, &n, sizeof(uint32_t));
+	_ujo_writer_put(w, d, n);
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -936,7 +968,7 @@ ujoError ujo_writer_table_open(ujo_writer* w)
 	w->state->table.columns = 0;
 	w->state->table.column  = 0;
 
-	_ujo_writer_buffer_set_uint8(w, UJO_TYPE_TABLE);
+	_ujo_writer_put_uint8(w, UJO_TYPE_TABLE);
 
 	return UJO_SUCCESS;
 };
@@ -954,10 +986,12 @@ ujoError ujo_writer_table_open(ujo_writer* w)
  */
 ujoError ujo_writer_table_end_columns(ujo_writer* w)
 {
+	ujoError err;
+
 	report_error(w->state->state==STATE_TABLE_COLUMNS,"close table columns not allowed", UJO_ERR_INVALID_OBJECT);
 	report_error(w->state->table.columns > 0,"minimum column count mismatch", UJO_ERR_INVALID_OBJECT);
 	
-	_ujo_writer_buffer_set_uint8(w, UJO_TERMINATOR);
+	return_on_err(_ujo_writer_put_uint8(w, UJO_TERMINATOR));
 
     w->state->state = STATE_TABLE_VALUES;
 
@@ -980,7 +1014,7 @@ ujoError ujo_writer_table_close(ujo_writer* w)
 	report_error(w->state->table.column == 0,"unbalanced table row", UJO_ERR_INVALID_OBJECT);
 	
 	w->state = ujo_state_prev(w->state, w->state_stack);
-	_ujo_writer_buffer_set_uint8(w, UJO_TERMINATOR);
+	_ujo_writer_put_uint8(w, UJO_TERMINATOR);
 
     w->state = ujo_state_switch(CONTAINER_CLOSED, w->state, w->state_stack);
 
@@ -992,7 +1026,7 @@ ujoError ujo_writer_table_close(ujo_writer* w)
 @cond INTERNAL_DOCS
 */
 
-void _ujo_writer_buffer_put(ujo_writer* w, const void* sequence, size_t bytes) 
+static __inline ujoError _ujo_writer_put_memory(ujo_writer* w, const void* sequence, size_t bytes) 
 {
 	uint64_t   totalbytes;
 	size_t     newbufsize;
@@ -1008,7 +1042,7 @@ void _ujo_writer_buffer_put(ujo_writer* w, const void* sequence, size_t bytes)
 		w->buffer = (ujoByte*)realloc(w->buffer, newbufsize);
 		if (w->buffer == NULL) {
 			w->buffer = temp;
-			return_if_fail(ujoFalse, "resize buffer failed");
+			report_error(ujoFalse, "resize buffer failed", UJO_ERR_ALLOCATION);
 		} /* end if */
 		w->buffersize = newbufsize;
 	}
@@ -1017,22 +1051,44 @@ void _ujo_writer_buffer_put(ujo_writer* w, const void* sequence, size_t bytes)
 	memcpy(w->buffer+w->bytes, sequence, bytes);
 	w->bytes += bytes;
 
-	return;
+	return UJO_SUCCESS;
 };
 
-
-void _ujo_writer_buffer_set_uint8(ujo_writer* w, uint8_t value) 
+static __inline ujoError _ujo_writer_put_file(ujo_writer* w, const void* sequence, size_t bytes) 
 {
-	_ujo_writer_buffer_put(w, &value, sizeof(uint8_t));
-	return;
+	/* write sequence to file */
+
+	report_error(fwrite(sequence, 1, bytes, w->file) == bytes,
+		"write to file failed", UJO_ERR_FILE);
+
+	return UJO_SUCCESS;
 };
 
-void _ujo_writer_buffer_set_uint16(ujo_writer* w, uint16_t value) 
+
+ujoError _ujo_writer_put(ujo_writer* w, const void* sequence, size_t bytes)
 {
-	_ujo_writer_buffer_put(w, &value, sizeof(uint16_t));
-	return;
+	ujoError err = UJO_SUCCESS;
+
+	switch(w->type)
+	{
+	case UJO_MEMORY:
+		err = _ujo_writer_put_memory(w, sequence, bytes);
+		break;
+	case UJO_FILE:
+		err = _ujo_writer_put_file(w, sequence, bytes);
+	}
+	return err;
+}
+
+ujoError _ujo_writer_put_uint8(ujo_writer* w, uint8_t value) 
+{
+	return _ujo_writer_put(w, &value, sizeof(uint8_t));
 };
 
+ujoError _ujo_writer_put_uint16(ujo_writer* w, uint16_t value)
+{
+	return _ujo_writer_put(w, &value, sizeof(uint16_t));
+};
 
 
 /**

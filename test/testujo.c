@@ -1255,7 +1255,7 @@ ujoBool test08()
 
 	// float integrity --------------------------------------------------------
 	err = ujo_new_memory_writer(&ujow);
-	print_return_ujo_err(err,"ujo_new_writer"); 
+	print_return_ujo_err(err,"ujo_new_memory_writer"); 
 	
 	err = ujo_writer_list_open(ujow);
 	print_return_ujo_err(err,"ujo_writer_list_open"); 
@@ -1290,7 +1290,7 @@ ujoBool test08()
 
 	// int integrity -------------------------------------------------------------
 	err = ujo_new_memory_writer(&ujow);
-	print_return_ujo_err(err,"ujo_new_writer"); 
+	print_return_ujo_err(err,"ujo_new_memory_writer"); 
 	
 	err = ujo_writer_list_open(ujow);
 	print_return_ujo_err(err,"ujo_writer_list_open"); 
@@ -1308,7 +1308,7 @@ ujoBool test08()
 	print_return_ujo_err(err,"ujo_writer_add_int64"); 
 
 	err = ujo_writer_list_close(ujow);
-	print_return_ujo_err(err,"ujo_writer_table_close"); 
+	print_return_ujo_err(err,"ujo_writer_list_close"); 
 
 	err = ujo_writer_get_buffer(ujow, &data, &datasize);
 	print_return_ujo_err(err,"ujo_writer_get_buffer"); 
@@ -1321,6 +1321,37 @@ ujoBool test08()
 	printf("%s\n", binstring);
 	print_return_expr_fail(strcmp("5f554a4f010000300882070004064e61bc00054e61bc000000000000",binstring) == 0,"int integrity failed");
 	free(binstring);
+
+	err = ujo_free_writer(ujow);
+	print_return_ujo_err(err,"ujo_free_writer"); 
+
+	return ujoTrue;
+};
+
+/**
+ * test09: test file access
+ */
+ujoBool test09()
+{
+	ujo_writer *ujow;
+	ujoError   err = UJO_SUCCESS;
+	err = ujo_new_file_writer(&ujow, "./test09.ujo");
+	print_return_ujo_err(err,"ujo_new_memory_writer"); 
+	
+	err = ujo_writer_list_open(ujow);
+	print_return_ujo_err(err,"ujo_writer_list_open"); 
+
+	err = ujo_writer_add_float16(ujow, 4.13);
+	print_return_ujo_err(err,"ujo_writer_add_float16");
+
+	err = ujo_writer_add_float32(ujow, 3.14);
+	print_return_ujo_err(err,"ujo_writer_add_float32"); 
+
+	err = ujo_writer_add_float64(ujow, 3.14);
+	print_return_ujo_err(err,"ujo_writer_add_float64"); 
+
+	err = ujo_writer_list_close(ujow);
+	print_return_ujo_err(err,"ujo_writer_list_close"); 
 
 	err = ujo_free_writer(ujow);
 	print_return_ujo_err(err,"ujo_free_writer"); 
@@ -1391,6 +1422,13 @@ ujoBool run_test(int no)
 			printf ("Test 08: format integrity [ FAILED ]\n");
 			return ujoFalse;
 		}; break;
+	case 9: 
+		if (test09()) {
+			printf ("Test 09: file access [   OK   ]\n");
+		}else {
+			printf ("Test 09: file access [ FAILED ]\n");
+			return ujoFalse;
+		}; break;
 	default:
 		printf ("Test with no %d not found! [ FAILED ]\n", no);
 		return ujoFalse;
@@ -1426,7 +1464,7 @@ int main(int argc, char **argv)
 		}
 	}
 	else {
-		for (testno = 1; testno <= 8; testno++)
+		for (testno = 1; testno <= 9; testno++)
 		{
 			if (!run_test(testno)) {
 			return -1;

@@ -41,7 +41,7 @@ BEGIN_C_DECLS
  */
 
 	ujoError ujo_new_memory_writer(ujo_writer** w);
-	ujoError ujo_new_file_writer(ujo_writer** w, wchar_t* filename);
+	ujoError ujo_new_file_writer(ujo_writer** w, const char* filename);
 
 	ujoError ujo_free_writer(ujo_writer* w);
 
@@ -108,9 +108,10 @@ BEGIN_C_DECLS
 	/** 
 	@cond INTERNAL_DOCS
 	*/
-	void _ujo_writer_buffer_put(ujo_writer* w, const void* sequence, size_t bytes);
-	void _ujo_writer_buffer_set_uint8(ujo_writer* w, uint8_t value); 
-	void _ujo_writer_buffer_set_uint16(ujo_writer* w, uint16_t value); 
+
+	ujoError _ujo_writer_put(ujo_writer* w, const void* sequence, size_t bytes);
+	ujoError _ujo_writer_put_uint8(ujo_writer* w, uint8_t value); 
+	ujoError _ujo_writer_put_uint16(ujo_writer* w, uint16_t value); 
 
 	/**
 	@endcond
