@@ -136,7 +136,7 @@ ujoBool test01()
 
 	ujo_reader *ujor;
 
-	err = ujo_new_writer(UJO_MEMORY, &ujow);
+	err = ujo_new_memory_writer(&ujow);
 	print_return_ujo_err(err,"ujo_new_writer"); 
 
 	
@@ -199,7 +199,7 @@ ujoBool test01()
 
 
 	/* test the reader */
-	err = ujo_new_reader(UJO_MEMORY, &ujor);
+	err = ujo_new_memory_reader(&ujor);
 	print_return_ujo_err(err,"ujo_new_reader"); 
 
 		err = ujo_reader_set_buffer(ujor, data, datasize);
@@ -299,7 +299,7 @@ ujoBool test02()
 //		printf("**saved data size %i\n",datasize);
 //		printf("**actual data size %i\n",get_write_buffer_size(ujow));
 
-	err = ujo_new_writer(UJO_MEMORY, &ujow);
+	err = ujo_new_memory_writer(&ujow);
 	print_return_ujo_err(err,"ujo_new_writer"); 
 
 	
@@ -390,7 +390,7 @@ ujoBool test02()
 	print_buffer(data, datasize);
 
 	/* ---> test the reader */
-	err = ujo_new_reader(UJO_MEMORY, &ujor);
+	err = ujo_new_memory_reader(&ujor);
 	print_return_ujo_err(err,"ujo_new_reader"); 
 
 		err = ujo_reader_set_buffer(ujor, data, datasize);
@@ -610,7 +610,7 @@ ujoBool test03()
 	int64_t         uxtime;
 	ujoDateTime	    dt;
 
-	err = ujo_new_writer(UJO_MEMORY, &ujow);
+	err = ujo_new_memory_writer(&ujow);
 	print_return_ujo_err(err,"ujo_new_writer"); 
 
 	
@@ -674,7 +674,7 @@ ujoBool test03()
 	print_buffer(data, datasize);
 
 	/* ---> test the reader */
-	err = ujo_new_reader(UJO_MEMORY, &ujor);
+	err = ujo_new_memory_reader(&ujor);
 	print_return_ujo_err(err,"ujo_new_reader"); 
 
 	err = ujo_reader_set_buffer(ujor, data, datasize);
@@ -808,7 +808,7 @@ ujoBool test04()
 	char*           strval;
 	uint32_t        strsize;
 
-	err = ujo_new_writer(UJO_MEMORY, &ujow);
+	err = ujo_new_memory_writer(&ujow);
 	print_return_ujo_err(err,"ujo_new_writer"); 
 
 	
@@ -831,7 +831,7 @@ ujoBool test04()
 	print_buffer(data, datasize);
 
 	/* ---> test the reader */
-	err = ujo_new_reader(UJO_MEMORY, &ujor);
+	err = ujo_new_memory_reader(&ujor);
 	print_return_ujo_err(err,"ujo_new_reader"); 
 
 	err = ujo_reader_set_buffer(ujor, data, datasize);
@@ -948,6 +948,12 @@ ujoError myOnElement (ujo_element *element, ujoPointer data){
 			  print_return_ujo_err(err,"ujo_element_get_float32");
         printf("float32 \"%lf\"found\n", f32Val);
 				break;
+			case UJO_TYPE_FLOAT16:
+        f32Val = -1.0;
+			  err = ujo_element_get_float16(element, &f32Val);
+			  print_return_ujo_err(err,"ujo_element_get_float16");
+        printf("float16 \"%lf\"found\n", f32Val);
+				break;
 			case UJO_TYPE_FLOAT64:
         f64Val = -1.0;
 			  err = ujo_element_get_float64(element, &f64Val);
@@ -1006,7 +1012,7 @@ ujoBool test05()
   
   tab = 0;
 
-	err = ujo_new_writer(UJO_MEMORY, &ujow);
+	err = ujo_new_memory_writer(&ujow);
 	print_return_ujo_err(err,"ujo_new_writer"); 
 
 	
@@ -1069,7 +1075,7 @@ ujoBool test05()
 
 
 	/* test the reader */
-	err = ujo_new_reader(UJO_MEMORY, &ujor);
+	err = ujo_new_memory_reader(&ujor);
 	print_return_ujo_err(err,"ujo_new_reader"); 
 
     err = ujo_reader_set_buffer(ujor, data, datasize);
@@ -1102,7 +1108,7 @@ ujoBool test06()
 
 	ujo_reader *ujor;
 
-	err = ujo_new_writer(UJO_MEMORY, &ujow);
+	err = ujo_new_memory_writer(&ujow);
 	print_return_ujo_err(err,"ujo_new_writer"); 
 
 	
@@ -1168,7 +1174,7 @@ ujoBool test06()
 	print_buffer(data, datasize);
 
 	/* test the reader */
-	err = ujo_new_reader(UJO_MEMORY, &ujor);
+	err = ujo_new_memory_reader(&ujor);
 	print_return_ujo_err(err,"ujo_new_reader"); 
 
     err = ujo_reader_set_buffer(ujor, data, datasize);
@@ -1203,7 +1209,7 @@ ujoBool test07()
 
 	ujo_reader *ujor;
 
-	err = ujo_new_writer(UJO_MEMORY, &ujow);
+	err = ujo_new_memory_writer(&ujow);
 	print_return_ujo_err(err,"ujo_new_writer"); 
 	
 
@@ -1230,7 +1236,7 @@ ujoBool test07()
 	print_buffer(data, datasize);
 
 	/* test the reader */
-	err = ujo_new_reader(UJO_MEMORY, &ujor);
+	err = ujo_new_memory_reader(&ujor);
 	print_return_ujo_err(err,"ujo_new_reader"); 
 
     err = ujo_reader_set_buffer(ujor, data, datasize);
@@ -1264,8 +1270,8 @@ ujoBool test08()
 	char* binstring;
 
 	// float integrity --------------------------------------------------------
-	err = ujo_new_writer(UJO_MEMORY, &ujow);
-	print_return_ujo_err(err,"ujo_new_writer"); 
+	err = ujo_new_memory_writer(&ujow);
+	print_return_ujo_err(err,"ujo_new_memory_writer"); 
 	
 	err = ujo_writer_list_open(ujow);
 	print_return_ujo_err(err,"ujo_writer_list_open"); 
@@ -1299,8 +1305,8 @@ ujoBool test08()
 	print_return_ujo_err(err,"ujo_free_writer"); 
 
 	// int integrity -------------------------------------------------------------
-	err = ujo_new_writer(UJO_MEMORY, &ujow);
-	print_return_ujo_err(err,"ujo_new_writer"); 
+	err = ujo_new_memory_writer(&ujow);
+	print_return_ujo_err(err,"ujo_new_memory_writer"); 
 	
 	err = ujo_writer_list_open(ujow);
 	print_return_ujo_err(err,"ujo_writer_list_open"); 
@@ -1318,7 +1324,7 @@ ujoBool test08()
 	print_return_ujo_err(err,"ujo_writer_add_int64"); 
 
 	err = ujo_writer_list_close(ujow);
-	print_return_ujo_err(err,"ujo_writer_table_close"); 
+	print_return_ujo_err(err,"ujo_writer_list_close"); 
 
 	err = ujo_writer_get_buffer(ujow, &data, &datasize);
 	print_return_ujo_err(err,"ujo_writer_get_buffer"); 
@@ -1334,6 +1340,56 @@ ujoBool test08()
 
 	err = ujo_free_writer(ujow);
 	print_return_ujo_err(err,"ujo_free_writer"); 
+
+	return ujoTrue;
+};
+
+/**
+ * test09: test file access
+ */
+ujoBool test09()
+{
+	ujo_writer *ujow;
+	ujo_reader *ujor;
+
+	ujoError   err = UJO_SUCCESS;
+	
+	// writer
+	err = ujo_new_file_writer(&ujow, "./test09.ujo");
+	print_return_ujo_err(err,"ujo_new_memory_writer"); 
+	
+	err = ujo_writer_list_open(ujow);
+	print_return_ujo_err(err,"ujo_writer_list_open"); 
+
+	err = ujo_writer_add_float16(ujow, 24.135);
+	print_return_ujo_err(err,"ujo_writer_add_float16");
+
+	err = ujo_writer_add_float32(ujow, 3.14);
+	print_return_ujo_err(err,"ujo_writer_add_float32"); 
+
+	err = ujo_writer_add_float64(ujow, 3.14);
+	print_return_ujo_err(err,"ujo_writer_add_float64"); 
+
+	err = ujo_writer_list_close(ujow);
+	print_return_ujo_err(err,"ujo_writer_list_close"); 
+
+	err = ujo_free_writer(ujow);
+	print_return_ujo_err(err,"ujo_free_writer"); 
+
+	// reader
+	err = ujo_new_file_reader(&ujor, "./test09.ujo");
+	print_return_ujo_err(err,"ujo_new_file_reader"); 
+
+    err = ujo_reader_set_on_element(ujor, myOnElement, ujor);
+	print_return_ujo_err(err,"ujo_reader_set_on_element"); 
+
+    err = ujo_reader_parse(ujor);
+	print_return_ujo_err(err,"ujo_reader_parse"); 
+
+	err = ujo_free_reader(ujor);
+	print_return_ujo_err(err,"ujo_free_reader"); 
+
+
 
 	return ujoTrue;
 };
@@ -1401,6 +1457,13 @@ ujoBool run_test(int no)
 			printf ("Test 08: format integrity [ FAILED ]\n");
 			return ujoFalse;
 		}; break;
+	case 9: 
+		if (test09()) {
+			printf ("Test 09: file access [   OK   ]\n");
+		}else {
+			printf ("Test 09: file access [ FAILED ]\n");
+			return ujoFalse;
+		}; break;
 	default:
 		printf ("Test with no %d not found! [ FAILED ]\n", no);
 		return ujoFalse;
@@ -1436,7 +1499,7 @@ int main(int argc, char **argv)
 		}
 	}
 	else {
-		for (testno = 1; testno <= 8; testno++)
+		for (testno = 1; testno <= 9; testno++)
 		{
 			if (!run_test(testno)) {
 			return -1;

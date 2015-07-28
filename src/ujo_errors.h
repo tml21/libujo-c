@@ -35,10 +35,19 @@
 #define UJO_ERR_TYPE_MISPLACED          5504    // a type is not allowed in a specifc location
 #define UJO_ERR_INVALID_OBJECT          5505    // an operation can only be performed on specific objects
 #define UJO_ERR_NOT_IMPLEMENTED         5506    // the feature is not yet implemented
+#define UJO_ERR_FILE                    5507    // a file operation error
 
 
 #define report_error(expr,message,ecode) \
 	if (!(expr)) {UJO_LOG(#message":expression failed %s: error (%d)", #expr, ecode); return ecode;}
+
+/**
+ * @brief check if expr is UJO_SUCCESS and return the error if not.
+ *
+ * @param expr The expresion to check.
+ */
+#define return_on_err(expr) \
+	err = expr; if (err != UJO_SUCCESS) {return err;}
 
 /** 
  * @brief Allows to check a condition and return if it is not meet.

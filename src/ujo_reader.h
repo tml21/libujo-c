@@ -63,7 +63,11 @@ BEGIN_C_DECLS
  * @{
  */
 
-	ujoError ujo_new_reader(ujoAccessType type, ujo_reader** r);
+	ujoError ujo_new_memory_reader(ujo_reader** r);
+
+	ujoError ujo_new_file_reader(ujo_reader** r, const char* filename);
+
+
 	ujoError ujo_free_reader(ujo_reader* r);
 
 	ujoError ujo_reader_get_type(ujo_reader* r, ujoAccessType* type);
@@ -121,7 +125,7 @@ BEGIN_C_DECLS
 /** 
 @cond INTERNAL_DOCS
 */
-	void _ujo_reader_buffer_read(ujo_reader* r, void* sequence, size_t bytes);
+	ujoError _ujo_reader_get_data(ujo_reader* r, void* sequence, size_t bytes);
 
 /**
 @endcond
