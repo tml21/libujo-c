@@ -43,9 +43,20 @@ struct _ujo_reader {
 	ujoStack*		state_stack;
 	ujo_state*		state;
 
+	// header
+	struct  {
+		char            magic[4];
+		uint16_t        version;
+		uint8_t         compression;
+	} header;
+
+	// memory reader
 	size_t			buffersize;
 	ujoByte*		buffer;
 	size_t			parsed;
+
+	// file reader
+	FILE*           file;
 
 	ujoOnElementFunc  onElement;
 	ujoPointer        onElementData;
@@ -162,9 +173,22 @@ ujoError ujo_new_memory_reader(ujo_reader** r)
  *
  * @return UJO error code or UJO_SUCCESS
  * @sa ujo_free_reader
- */ujoError ujo_new_file_reader(ujo_reader** r, wchar_t* filename)
+ */ujoError ujo_new_file_reader(ujo_reader** r, const char* filename)
 {
-	return UJO_ERR_NOT_IMPLEMENTED;
+	ujoError     err;
+	ujo_reader*  newr;
+	FILE*        filehandle;
+
+	filehandle = fopen(filename, "rb"); 
+    report_error(filehandle != NULL, "cannot open file", UJO_ERR_FILE);	
+	return_on_err(_ujo_new_reader(&newr));
+	
+	newr->type = UJO_FILE;
+	newr->file = filehandle;
+
+	*r = newr;
+
+	return UJO_SUCCESS;
 }
 
 
@@ -211,9 +235,18 @@ ujoError ujo_free_reader(ujo_reader* r)
 {
 	report_error(r, "invalid handle", UJO_ERR_INVALID_DATA);	
 	
-	ujo_free_stack(r->state_stack);
-	ujo_free(r->buffer);
+	ujo_free_stack(r->state_stack);	
 	ujo_free(r->state);
+	
+	switch(r->type) {
+	case UJO_MEMORY:
+		ujo_free(r->buffer);
+		break;
+	case UJO_FILE:
+		fclose(r->file);
+		break;
+	}
+	
 	ujo_free(r);
 
 	return UJO_SUCCESS;
@@ -239,17 +272,19 @@ ujoError ujo_reader_get_type(ujo_reader* r, ujoAccessType* type)
 
 static __inline ujoError _ujo_reader_parse_header(ujo_reader *r)
 {
-	uint16_t version;
-	ujoByte *cursor = r->buffer + r->parsed;
+	ujoError err;
 
-	report_error(r->buffersize - r->parsed >= 7, "buffer size too small", UJO_ERR_INVALID_DATA);
-	report_error(strncmp(UJO_MAGIC, (const char*)cursor,4) == 0, "no ujo header found", UJO_ERR_INVALID_DATA);
-	memcpy(&version, cursor+4, sizeof(uint16_t));
-	
-	printf("UJO Version %i\n", version); 
+    // get magic code
+	return_on_err(_ujo_reader_get_data(r,&(r->header.magic[0]), 4));
+	report_error(strncmp(UJO_MAGIC, (const char*)r->header.magic,4) == 0, "no ujo header found", UJO_ERR_INVALID_DATA);
 
-	report_error(version == 1, "unsupported UJO version", UJO_ERR_INVALID_DATA);
-	r->parsed += 7;
+	// get version
+	return_on_err(_ujo_reader_get_data(r,&(r->header.version), sizeof(uint16_t)));
+	report_error(r->header.version == 1, "unsupported UJO version", UJO_ERR_INVALID_DATA);
+
+	// compression
+	return_on_err(_ujo_reader_get_data(r,&(r->header.compression), sizeof(uint8_t))); // always \x00
+
 	return UJO_SUCCESS;
 }
 
@@ -273,7 +308,9 @@ static __inline ujoError _ujo_reader_open_table(ujo_reader *r, ujo_element *v)
 
 static __inline ujoError _ujo_reader_parse_int64(ujo_reader *r, ujo_element *v)
 {
-	_ujo_reader_buffer_read(r,&(v->int64val), sizeof(int64_t));
+	ujoError err;
+
+	return_on_err(_ujo_reader_get_data(r,&(v->int64val), sizeof(int64_t)));
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -281,7 +318,9 @@ static __inline ujoError _ujo_reader_parse_int64(ujo_reader *r, ujo_element *v)
 
 static __inline ujoError _ujo_reader_parse_int32(ujo_reader *r, ujo_element *v)
 {
-	_ujo_reader_buffer_read(r,&(v->int32val), sizeof(int32_t));
+	ujoError err;
+
+	return_on_err(_ujo_reader_get_data(r,&(v->int32val), sizeof(int32_t)));
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -289,7 +328,9 @@ static __inline ujoError _ujo_reader_parse_int32(ujo_reader *r, ujo_element *v)
 
 static __inline ujoError _ujo_reader_parse_int16(ujo_reader *r, ujo_element *v)
 {
-	_ujo_reader_buffer_read(r,&(v->int16val), sizeof(int16_t));
+	ujoError err;
+
+	return_on_err(_ujo_reader_get_data(r,&(v->int16val), sizeof(int16_t)));
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -297,7 +338,9 @@ static __inline ujoError _ujo_reader_parse_int16(ujo_reader *r, ujo_element *v)
 
 static __inline ujoError _ujo_reader_parse_int8(ujo_reader *r, ujo_element *v)
 {
-	_ujo_reader_buffer_read(r,&(v->int8val), sizeof(int8_t));
+	ujoError err;
+
+	return_on_err(_ujo_reader_get_data(r,&(v->int8val), sizeof(int8_t)));
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -305,7 +348,9 @@ static __inline ujoError _ujo_reader_parse_int8(ujo_reader *r, ujo_element *v)
 
 static __inline ujoError _ujo_reader_parse_uint64(ujo_reader *r, ujo_element *v)
 {
-	_ujo_reader_buffer_read(r,&(v->uint64val), sizeof(uint64_t));
+	ujoError err;
+
+	return_on_err(_ujo_reader_get_data(r,&(v->uint64val), sizeof(uint64_t)));
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -313,7 +358,9 @@ static __inline ujoError _ujo_reader_parse_uint64(ujo_reader *r, ujo_element *v)
 
 static __inline ujoError _ujo_reader_parse_uint32(ujo_reader *r, ujo_element *v)
 {
-	_ujo_reader_buffer_read(r,&(v->uint32val), sizeof(uint32_t));
+	ujoError err;
+
+	return_on_err(_ujo_reader_get_data(r,&(v->uint32val), sizeof(uint32_t)));
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -321,7 +368,9 @@ static __inline ujoError _ujo_reader_parse_uint32(ujo_reader *r, ujo_element *v)
 
 static __inline ujoError _ujo_reader_parse_uint16(ujo_reader *r, ujo_element *v)
 {
-	_ujo_reader_buffer_read(r,&(v->uint16val), sizeof(uint16_t));
+	ujoError err;
+
+	return_on_err(_ujo_reader_get_data(r,&(v->uint16val), sizeof(uint16_t)));
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -329,7 +378,9 @@ static __inline ujoError _ujo_reader_parse_uint16(ujo_reader *r, ujo_element *v)
 
 static __inline ujoError _ujo_reader_parse_uint8(ujo_reader *r, ujo_element *v)
 {
-	_ujo_reader_buffer_read(r,&(v->uint8val), sizeof(uint8_t));
+	ujoError err;
+
+	return_on_err(_ujo_reader_get_data(r,&(v->uint8val), sizeof(uint8_t)));
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -337,7 +388,9 @@ static __inline ujoError _ujo_reader_parse_uint8(ujo_reader *r, ujo_element *v)
 
 static __inline ujoError _ujo_reader_parse_float16(ujo_reader *r, ujo_element *v)
 {
-	_ujo_reader_buffer_read(r,&(v->float16val), sizeof(float16_t));
+	ujoError err;
+
+	return_on_err(_ujo_reader_get_data(r,&(v->float16val), sizeof(float16_t)));
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -345,7 +398,9 @@ static __inline ujoError _ujo_reader_parse_float16(ujo_reader *r, ujo_element *v
 
 static __inline ujoError _ujo_reader_parse_float32(ujo_reader *r, ujo_element *v)
 {
-	_ujo_reader_buffer_read(r,&(v->float32val), sizeof(float32_t));
+	ujoError err;
+
+	return_on_err(_ujo_reader_get_data(r,&(v->float32val), sizeof(float32_t)));
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -353,7 +408,9 @@ static __inline ujoError _ujo_reader_parse_float32(ujo_reader *r, ujo_element *v
 
 static __inline ujoError _ujo_reader_parse_float64(ujo_reader *r, ujo_element *v)
 {
-	_ujo_reader_buffer_read(r,&(v->float64val), sizeof(float64_t));
+	ujoError err;
+
+	return_on_err(_ujo_reader_get_data(r,&(v->float64val), sizeof(float64_t)));
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -361,7 +418,9 @@ static __inline ujoError _ujo_reader_parse_float64(ujo_reader *r, ujo_element *v
 
 static __inline ujoError _ujo_reader_parse_bool(ujo_reader *r, ujo_element *v)
 {
-	_ujo_reader_buffer_read(r,&(v->boolval), sizeof(ujoBool));
+	ujoError err;
+
+	return_on_err(_ujo_reader_get_data(r,&(v->boolval), sizeof(ujoBool)));
 
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
@@ -385,7 +444,9 @@ static __inline ujoError _ujo_reader_close_container(ujo_reader *r, ujo_element 
 
 static __inline ujoError _ujo_reader_parse_uxtime(ujo_reader *r, ujo_element *v)
 {
-	_ujo_reader_buffer_read(r,&(v->uxtime), sizeof(int64_t));
+	ujoError err;
+
+	return_on_err(_ujo_reader_get_data(r,&(v->uxtime), sizeof(int64_t)));
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -393,9 +454,11 @@ static __inline ujoError _ujo_reader_parse_uxtime(ujo_reader *r, ujo_element *v)
 
 static __inline ujoError _ujo_reader_parse_date(ujo_reader *r, ujo_element *v)
 {
-	_ujo_reader_buffer_read(r,&(v->datetime.year), sizeof(int16_t));
-	_ujo_reader_buffer_read(r,&(v->datetime.month), sizeof(uint8_t));
-	_ujo_reader_buffer_read(r,&(v->datetime.day), sizeof(uint8_t));
+	ujoError err;
+
+	return_on_err(_ujo_reader_get_data(r,&(v->datetime.year), sizeof(int16_t)));
+	return_on_err(_ujo_reader_get_data(r,&(v->datetime.month), sizeof(uint8_t)));
+	return_on_err(_ujo_reader_get_data(r,&(v->datetime.day), sizeof(uint8_t)));
 
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
@@ -404,9 +467,11 @@ static __inline ujoError _ujo_reader_parse_date(ujo_reader *r, ujo_element *v)
 
 static __inline ujoError _ujo_reader_parse_time(ujo_reader *r, ujo_element *v)
 {
-	_ujo_reader_buffer_read(r,&(v->datetime.hour), sizeof(uint8_t));
-	_ujo_reader_buffer_read(r,&(v->datetime.minute), sizeof(uint8_t));
-	_ujo_reader_buffer_read(r,&(v->datetime.second), sizeof(uint8_t));
+	ujoError err;
+
+	return_on_err(_ujo_reader_get_data(r,&(v->datetime.hour), sizeof(uint8_t)));
+	return_on_err(_ujo_reader_get_data(r,&(v->datetime.minute), sizeof(uint8_t)));
+	return_on_err(_ujo_reader_get_data(r,&(v->datetime.second), sizeof(uint8_t)));
 
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
@@ -415,15 +480,17 @@ static __inline ujoError _ujo_reader_parse_time(ujo_reader *r, ujo_element *v)
 
 static __inline ujoError _ujo_reader_parse_timestamp(ujo_reader *r, ujo_element *v)
 {
-	_ujo_reader_buffer_read(r,&(v->datetime.year), sizeof(int16_t));
-	_ujo_reader_buffer_read(r,&(v->datetime.month), sizeof(uint8_t));
-	_ujo_reader_buffer_read(r,&(v->datetime.day), sizeof(uint8_t));
+	ujoError err;
 
-	_ujo_reader_buffer_read(r,&(v->datetime.hour), sizeof(uint8_t));
-	_ujo_reader_buffer_read(r,&(v->datetime.minute), sizeof(uint8_t));
-	_ujo_reader_buffer_read(r,&(v->datetime.second), sizeof(uint8_t));
+	return_on_err(_ujo_reader_get_data(r,&(v->datetime.year), sizeof(int16_t)));
+	return_on_err(_ujo_reader_get_data(r,&(v->datetime.month), sizeof(uint8_t)));
+	return_on_err(_ujo_reader_get_data(r,&(v->datetime.day), sizeof(uint8_t)));
 
-	_ujo_reader_buffer_read(r,&(v->datetime.millisecond), sizeof(uint16_t));
+	return_on_err(_ujo_reader_get_data(r,&(v->datetime.hour), sizeof(uint8_t)));
+	return_on_err(_ujo_reader_get_data(r,&(v->datetime.minute), sizeof(uint8_t)));
+	return_on_err(_ujo_reader_get_data(r,&(v->datetime.second), sizeof(uint8_t)));
+
+	return_on_err(_ujo_reader_get_data(r,&(v->datetime.millisecond), sizeof(uint16_t)));
 
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
@@ -432,30 +499,31 @@ static __inline ujoError _ujo_reader_parse_timestamp(ujo_reader *r, ujo_element 
 
 static __inline ujoError _ujo_reader_parse_string(ujo_reader *r, ujo_element *v)
 {
+	ujoError err;
 
-	_ujo_reader_buffer_read(r, &v->string.type, sizeof(ujoTypeId));
-	_ujo_reader_buffer_read(r,&v->string.n, sizeof(uint32_t));
+	return_on_err(_ujo_reader_get_data(r, &v->string.type, sizeof(ujoTypeId)));
+	return_on_err(_ujo_reader_get_data(r,&v->string.n, sizeof(uint32_t)));
 	switch (v->string.type)
 	{
 	case UJO_SUB_STRING_C:
 		v->string.c_string = (char*)ujo_calloc(v->string.n, sizeof(char));
 		report_error(v->string.c_string, "allocation failed", UJO_ERR_ALLOCATION);
-		_ujo_reader_buffer_read(r,v->string.c_string, v->string.n*sizeof(char));
+		return_on_err(_ujo_reader_get_data(r,v->string.c_string, v->string.n*sizeof(char)));
 		break;
 	case UJO_SUB_STRING_U8:
 		v->string.u8_string = (uint8_t*)ujo_calloc(v->string.n, sizeof(uint8_t));
 		report_error(v->string.u8_string, "allocation failed", UJO_ERR_ALLOCATION);
-		_ujo_reader_buffer_read(r,v->string.u8_string, v->string.n*sizeof(uint8_t));
+		return_on_err(_ujo_reader_get_data(r,v->string.u8_string, v->string.n*sizeof(uint8_t)));
 		break;
 	case UJO_SUB_STRING_U16:
 		v->string.u16_string = (uint16_t*)ujo_calloc(v->string.n, sizeof(uint16_t));
 		report_error(v->string.u16_string, "allocation failed", UJO_ERR_ALLOCATION);
-		_ujo_reader_buffer_read(r,v->string.u16_string, v->string.n*sizeof(uint16_t));
+		return_on_err(_ujo_reader_get_data(r,v->string.u16_string, v->string.n*sizeof(uint16_t)));
 		break;
 	case UJO_SUB_STRING_U32:
 		v->string.u32_string = (uint32_t*)ujo_calloc(v->string.n, sizeof(uint32_t));
 		report_error(v->string.u32_string, "allocation failed", UJO_ERR_ALLOCATION);
-		_ujo_reader_buffer_read(r,v->string.u32_string, v->string.n*sizeof(uint32_t));
+		return_on_err(_ujo_reader_get_data(r,v->string.u32_string, v->string.n*sizeof(uint32_t)));
 		break;
 	default:
 		report_error(0, "invalid string subtype", UJO_ERR_INVALID_DATA);
@@ -468,24 +536,50 @@ static __inline ujoError _ujo_reader_parse_string(ujo_reader *r, ujo_element *v)
 
 static __inline ujoError _ujo_reader_parse_binary(ujo_reader *r, ujo_element *v)
 {
+	ujoError err;
 
-	_ujo_reader_buffer_read(r, &v->binary.type, sizeof(ujoTypeId));
-	_ujo_reader_buffer_read(r,&v->binary.n, sizeof(uint32_t));
+	return_on_err(_ujo_reader_get_data(r, &v->binary.type, sizeof(ujoTypeId)));
+	return_on_err(_ujo_reader_get_data(r,&v->binary.n, sizeof(uint32_t)));
 
 	v->binary.data = (uint8_t*)ujo_calloc(v->binary.n, 1);
 	report_error(v->binary.data, "allocation failed", UJO_ERR_ALLOCATION);
-	_ujo_reader_buffer_read(r,v->binary.data, v->binary.n);
+	return_on_err(_ujo_reader_get_data(r,v->binary.data, v->binary.n));
 
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
 };
 
-void _ujo_reader_buffer_read(ujo_reader* r, void* sequence, size_t bytes) 
+static __inline ujoError _ujo_reader_get_memory_data(ujo_reader* r, void* sequence, size_t bytes) 
 {
 	ujoByte *cursor = r->buffer + r->parsed;
 	memcpy(sequence,cursor,bytes);
 	r->parsed += bytes;
+
+	return UJO_SUCCESS;
+}
+
+static __inline ujoError _ujo_reader_get_file_data(ujo_reader* r, void* sequence, size_t bytes) 
+{
+	report_error(fread(sequence, 1, bytes, r->file) == bytes,
+		"read from file failed", UJO_ERR_FILE);
+
+	return UJO_SUCCESS;
+}
+
+ujoError _ujo_reader_get_data(ujo_reader* r, void* sequence, size_t bytes) 
+{
+	ujoError err = UJO_SUCCESS;
+
+	switch(r->type)
+	{
+	case UJO_MEMORY:
+		err = _ujo_reader_get_memory_data(r, sequence, bytes);
+		break;
+	case UJO_FILE:
+		err = _ujo_reader_get_file_data(r, sequence, bytes);
+	}
+	return err;
 }
 
 /**
@@ -612,10 +706,8 @@ ujoError ujo_reader_get_next(ujo_reader *r, ujo_element** v, ujoBool *eod)
 		*eod = ujoFalse;
 	}
 
-	report_error(r->parsed < r->buffersize,"buffer out of sync", UJO_ERR_INVALID_DATA);
-
 	value = ujo_new(ujo_element,1);
-	_ujo_reader_buffer_read(r,&(value->type), sizeof(uint8_t));
+	return_on_err(_ujo_reader_get_data(r,&(value->type), sizeof(uint8_t)));
 
 	switch(value->type)
 	{

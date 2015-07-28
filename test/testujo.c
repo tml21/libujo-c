@@ -941,6 +941,12 @@ ujoError myOnElement (ujo_element *element, ujoPointer data){
 			  print_return_ujo_err(err,"ujo_element_get_float32");
         printf("float32 \"%lf\"found\n", f32Val);
 				break;
+			case UJO_TYPE_FLOAT16:
+        f32Val = -1.0;
+			  err = ujo_element_get_float16(element, &f32Val);
+			  print_return_ujo_err(err,"ujo_element_get_float16");
+        printf("float16 \"%lf\"found\n", f32Val);
+				break;
 			case UJO_TYPE_FLOAT64:
         f64Val = -1.0;
 			  err = ujo_element_get_float64(element, &f64Val);
@@ -1334,14 +1340,18 @@ ujoBool test08()
 ujoBool test09()
 {
 	ujo_writer *ujow;
+	ujo_reader *ujor;
+
 	ujoError   err = UJO_SUCCESS;
+	
+	// writer
 	err = ujo_new_file_writer(&ujow, "./test09.ujo");
 	print_return_ujo_err(err,"ujo_new_memory_writer"); 
 	
 	err = ujo_writer_list_open(ujow);
 	print_return_ujo_err(err,"ujo_writer_list_open"); 
 
-	err = ujo_writer_add_float16(ujow, 4.13);
+	err = ujo_writer_add_float16(ujow, 24.135);
 	print_return_ujo_err(err,"ujo_writer_add_float16");
 
 	err = ujo_writer_add_float32(ujow, 3.14);
@@ -1355,6 +1365,21 @@ ujoBool test09()
 
 	err = ujo_free_writer(ujow);
 	print_return_ujo_err(err,"ujo_free_writer"); 
+
+	// reader
+	err = ujo_new_file_reader(&ujor, "./test09.ujo");
+	print_return_ujo_err(err,"ujo_new_file_reader"); 
+
+    err = ujo_reader_set_on_element(ujor, myOnElement, ujor);
+	print_return_ujo_err(err,"ujo_reader_set_on_element"); 
+
+    err = ujo_reader_parse(ujor);
+	print_return_ujo_err(err,"ujo_reader_parse"); 
+
+	err = ujo_free_reader(ujor);
+	print_return_ujo_err(err,"ujo_free_reader"); 
+
+
 
 	return ujoTrue;
 };

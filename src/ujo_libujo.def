@@ -19,6 +19,7 @@ ujo_writer_add_uint64
 ujo_writer_add_uint32
 ujo_writer_add_uint16
 ujo_writer_add_uint8
+ujo_writer_add_float16
 ujo_writer_add_float32
 ujo_writer_add_float64
 ujo_writer_add_bool
@@ -44,6 +45,7 @@ ujo_element_get_int16
 ujo_element_get_int32
 ujo_element_get_int64
 ujo_element_get_type
+ujo_element_get_float16
 ujo_element_get_float32
 ujo_element_get_float64
 ujo_element_get_bool
@@ -64,7 +66,6 @@ ujo_writer_add_binary
 ujo_writer_table_open
 ujo_writer_table_end_columns
 ujo_writer_table_close
-ujo_writer_add_float16
 ujo_element_get_binary
 ujo_element_get_string_type
 
