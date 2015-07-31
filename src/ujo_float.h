@@ -39,6 +39,9 @@
 #ifndef _UJO_FLOAT_H_
 #define _UJO_FLOAT_H_
 
+#define FLOAT16_EXPONENT_MASK 0x7C00
+#define FLOAT16_MANTISSA_MASK 0x3FF
+
 #include <stddef.h>
 #include "ujo_types.h"
 #include "ujo_int.h"
@@ -49,14 +52,13 @@ typedef double float64_t;
 
 BEGIN_C_DECLS
 
-float16_t float_to_half(float f);
+float16_t float_to_half(float32_t f);
 
-float half_to_float(float16_t h);
+float32_t half_to_float(float16_t h);
 
-int isinf(float32_t x);
+int isinf_float16(uint16_t x);
 
-int isnan(float32_t x);
-
+int isnan_float16(uint16_t x);
 
 END_C_DECLS
 

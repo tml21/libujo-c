@@ -513,7 +513,11 @@ ujoError ujo_writer_add_float16(ujo_writer* w, float32_t value)
 
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
-	if (isinf(half_to_float(hValue)) != 0)
+	if (isnan_float16(hValue) != 0)
+	{
+		report_error(0,"value is NaN", UJO_ERR_INVALID_DATA);
+	}
+	else if (isinf_float16(hValue) != 0)
 	{
 		report_error(0,"value is out of range", UJO_ERR_INVALID_DATA);
 	}

@@ -148,7 +148,7 @@ ujoBool test01()
 	err = ujo_writer_add_int64(ujow, 12345678);
 	print_return_ujo_err(err,"ujo_writer_add_int64");
 
-	err = ujo_writer_add_float16(ujow, -9909.13414);
+	err = ujo_writer_add_float16(ujow, 43332);
 	print_return_ujo_err(err,"ujo_writer_add_float16");
 
 	err = ujo_writer_add_float32(ujow, (float32_t)3.14);
@@ -941,12 +941,12 @@ ujoError myOnElement (ujo_element *element, ujoPointer data){
 			  print_return_ujo_err(err,"ujo_element_get_float32");
         printf("float32 \"%lf\"found\n", f32Val);
 				break;
-			case UJO_TYPE_FLOAT16:
+            case UJO_TYPE_FLOAT16:
         f32Val = -1.0;
-			  err = ujo_element_get_float16(element, &f32Val);
-			  print_return_ujo_err(err,"ujo_element_get_float16");
+              err = ujo_element_get_float16(element, &f32Val);
+              print_return_ujo_err(err,"ujo_element_get_float16");
         printf("float16 \"%lf\"found\n", f32Val);
-				break;
+                break;
 			case UJO_TYPE_FLOAT64:
         f64Val = -1.0;
 			  err = ujo_element_get_float64(element, &f64Val);
@@ -1016,6 +1016,9 @@ ujoBool test05()
  
 	err = ujo_writer_add_int64(ujow, 12345678);
 	print_return_ujo_err(err,"ujo_writer_add_int64"); 
+
+	err = ujo_writer_add_float16(ujow, (float32_t) (1/1));
+	print_return_ujo_err(err,"ujo_writer_add_float32");
 
 	err = ujo_writer_add_float32(ujow, (float32_t) 3.14);
 	print_return_ujo_err(err,"ujo_writer_add_float32"); 
@@ -1119,7 +1122,7 @@ ujoBool test06()
 	err = ujo_writer_table_end_columns(ujow);
 	print_return_ujo_err(err,"ujo_writer_table_end_columns"); 
 
-	// add firsst row
+	// add first row
 	err = ujo_writer_add_string_c(ujow,"Maik");
 	print_return_ujo_err(err,"ujo_writer_add_string_c"); 
 

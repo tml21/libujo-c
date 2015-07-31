@@ -275,7 +275,7 @@ static const uint16_t offsettable[64] = {
 };
 
 
-float16_t float_to_half(float val) {
+float16_t float_to_half(float32_t val) {
 
 	uint16_t h = 0;
 	uint32_t f =  (*(uint32_t *) &val);
@@ -285,48 +285,30 @@ float16_t float_to_half(float val) {
 	return h;
 }
 
-float half_to_float(float16_t h) {
+float32_t half_to_float(float16_t h) {
 
 	uint32_t f = 0;
-	float f32;
+	float32_t f32;
 
 	f = (*(uint32_t *) &h);
 
 	f = mantissatable[offsettable[h>>10]+(h&0x3ff)]+exponenttable[h>>10];
 
-	f32 = (*(float *) &f);
-
+	f32 = (*(float32_t *) &f);
 
 	return f32;
 }
 
-int isinf(float32_t x)
+int isinf_float16(uint16_t x)
 {
-    union { uint64_t u; float32_t f; } ieee754;
-    ieee754.f = x;
-    return ( (unsigned)(ieee754.u >> 32) & 0x7fffffff ) == 0x7ff00000 &&
-           ( (unsigned)ieee754.u == 0 );
+	if ( (x & FLOAT16_EXPONENT_MASK) == FLOAT16_EXPONENT_MASK ) return -1;
+	else return 0;
 }
 
-int isnan(float32_t x)
+int isnan_float16(uint16_t x)
 {
-    union { uint64_t u; float32_t f; } ieee754;
-    ieee754.f = x;
-    return ( (unsigned)(ieee754.u >> 32) & 0x7fffffff ) +
-           ( (unsigned)ieee754.u != 0 ) > 0x7ff00000;
+	if ( ( (x & FLOAT16_EXPONENT_MASK) == FLOAT16_EXPONENT_MASK) &&
+		 ( (x & FLOAT16_MANTISSA_MASK)  != 0 )) return -1;
+	else return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
