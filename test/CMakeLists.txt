@@ -31,13 +31,30 @@
 
 MESSAGE(STATUS "UJO regression tests")
 
+set  (TEST_UJO_HEADER
+      "testujo_helper.h"
+      "tests/ujo_tests.h"
+	  )
 
 set  (TEST_UJO_SOURCES
-      "testujo.c")
+      "testujo.c"
+	  "testujo_helper.c"
+	  "tests/test01.c"
+	  "tests/test02.c"
+	  "tests/test03.c"
+	  "tests/test04.c"
+	  "tests/test05.c"
+	  "tests/test06.c"
+	  "tests/test07.c"
+	  "tests/test08.c"
+	  "tests/test09.c"
+	  )
 
+source_group("Headerfiles" FILES ${TEST_UJO_HEADER})
 source_group("Sourcefiles" FILES ${TEST_UJO_SOURCES})
 
 include_directories (.)
+include_directories (./tests)
 include_directories (../src)
 
 
@@ -100,6 +117,6 @@ if (${UJO_TARGET_PLATFORM} STREQUAL linux_arm32)
 endif (${UJO_TARGET_PLATFORM} STREQUAL linux_arm32)
 
 add_executable(${TARGETNAME} 
-	${TEST_UJO_SOURCES})
+	${TEST_UJO_HEADER} ${TEST_UJO_SOURCES})
 target_link_libraries(${TARGETNAME} ${UJOLIBNAME}) 
 set_property(TARGET ${TARGETNAME} PROPERTY FOLDER "test")
