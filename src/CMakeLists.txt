@@ -45,7 +45,8 @@ set  (UJO_SOURCES_HEADER
       "ujo_reader.h"
       "ujo_state.h"
   	  "ujo_float.h"
-  	  "ujo_endian.h")
+  	  "ujo_endian.h"
+      "ujo_config.h")
 
 set  (UJO_SOURCES
 	  "ujo.c"

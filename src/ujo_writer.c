@@ -32,6 +32,7 @@
 #include "ujo_macros.h"
 #include "ujo_state.h"
 #include "ujo_float.h"
+#include "ujo_endian.h"
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
