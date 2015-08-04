@@ -49,19 +49,6 @@ BEGIN_C_DECLS
 #define UJO_LITTLE_ENDIAN 1234
 #define UJO_BIG_ENDIAN 4321
 
-#if UJO_BYTE_ORDER == UJO_LITTLE_ENDIAN
-# define UJO_UINT16_SWAP(x) (x)
-# define UJO_UINT32_SWAP(x) (x)
-# define UJO_UINT64_SWAP(x) (x)
-#elif UJO_BYTE_ORDER == UJO_BIG_ENDIAN
-# define UJO_UINT16_SWAP(x) _ujo_uint16_swap(x)
-# define UJO_UINT32_SWAP(x) _ujo_uint32_swap(x)
-# define UJO_UINT64_SWAP(x) _ujo_uint64_swap(x)
-#else
-# error "endianness unknown"
-#endif
-
-
 static __inline uint16_t _ujo_uint16_swap (uint16_t value)
 {
     return ((value & 0x00FF) << 8) |
@@ -88,9 +75,47 @@ static __inline uint64_t _ujo_uint64_swap (uint64_t value)
            ((value & 0xFF00000000000000ULL) >> 56);
 }
 
+static __inline float32_t _ujo_float32_swap (float32_t value)
+{
+    union {
+        uint32_t ui32;
+        float32_t f32;
+    } union_swap = { .f32 = value};
+
+    union_swap.ui32 = _ujo_uint32_swap(union_swap.ui32);
+
+    return union_swap.f32;
+}
+
+static __inline float64_t _ujo_float64_swap (float64_t value)
+{
+    union {
+        uint64_t ui64;
+        float64_t f64;
+    } union_swap = { .f64 = value};
+
+    union_swap.ui64 = _ujo_uint64_swap(union_swap.ui64);
+
+    return union_swap.f64;
+}
+
+#if UJO_BYTE_ORDER == UJO_LITTLE_ENDIAN
+# define UJO_UINT16_SWAP(x) (x)
+# define UJO_UINT32_SWAP(x) (x)
+# define UJO_UINT64_SWAP(x) (x)
+# define UJO_FLOAT32_SWAP(x) (x)
+# define UJO_FLOAT64_SWAP(x) (x)
+#elif UJO_BYTE_ORDER == UJO_BIG_ENDIAN
+# define UJO_UINT16_SWAP(x) _ujo_uint16_swap(x)
+# define UJO_UINT32_SWAP(x) _ujo_uint32_swap(x)
+# define UJO_UINT64_SWAP(x) _ujo_uint64_swap(x)
+# define UJO_FLOAT32_SWAP(x) _ujo_float32_swap(x)
+# define UJO_FLOAT64_SWAP(x) _ujo_float64_swap(x)
+#else
+# error "endianness unknown"
+#endif
 
 END_C_DECLS
-
 
 #endif // _UJO_ENDIAN_H_
 
