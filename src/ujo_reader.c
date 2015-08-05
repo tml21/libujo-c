@@ -34,6 +34,7 @@
 #include "ujo_constants.h"
 #include "ujo_state.h"
 #include "ujo_float.h"
+#include "ujo_endian.h"
 
 /** 
 @cond INTERNAL_DOCS
@@ -311,6 +312,7 @@ static __inline ujoError _ujo_reader_parse_int64(ujo_reader *r, ujo_element *v)
 	ujoError err;
 
 	return_on_err(_ujo_reader_get_data(r,&(v->int64val), sizeof(int64_t)));
+	v->int64val = (int64_t) UJO_UINT64_SWAP(v->int64val);
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -321,6 +323,7 @@ static __inline ujoError _ujo_reader_parse_int32(ujo_reader *r, ujo_element *v)
 	ujoError err;
 
 	return_on_err(_ujo_reader_get_data(r,&(v->int32val), sizeof(int32_t)));
+	v->int32val = (int32_t) UJO_UINT32_SWAP(v->int32val);
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -331,6 +334,7 @@ static __inline ujoError _ujo_reader_parse_int16(ujo_reader *r, ujo_element *v)
 	ujoError err;
 
 	return_on_err(_ujo_reader_get_data(r,&(v->int16val), sizeof(int16_t)));
+	v->int16val = (int16_t) UJO_UINT16_SWAP(v->int16val);
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -351,6 +355,7 @@ static __inline ujoError _ujo_reader_parse_uint64(ujo_reader *r, ujo_element *v)
 	ujoError err;
 
 	return_on_err(_ujo_reader_get_data(r,&(v->uint64val), sizeof(uint64_t)));
+	v->uint64val = (uint64_t) UJO_UINT64_SWAP(v->uint64val);
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -361,6 +366,7 @@ static __inline ujoError _ujo_reader_parse_uint32(ujo_reader *r, ujo_element *v)
 	ujoError err;
 
 	return_on_err(_ujo_reader_get_data(r,&(v->uint32val), sizeof(uint32_t)));
+	v->uint32val = (uint32_t) UJO_UINT32_SWAP(v->uint32val);
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -371,6 +377,7 @@ static __inline ujoError _ujo_reader_parse_uint16(ujo_reader *r, ujo_element *v)
 	ujoError err;
 
 	return_on_err(_ujo_reader_get_data(r,&(v->uint16val), sizeof(uint16_t)));
+	v->uint16val = (uint16_t) UJO_UINT16_SWAP(v->uint16val);
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -391,6 +398,7 @@ static __inline ujoError _ujo_reader_parse_float16(ujo_reader *r, ujo_element *v
 	ujoError err;
 
 	return_on_err(_ujo_reader_get_data(r,&(v->float16val), sizeof(float16_t)));
+	v->float16val = UJO_UINT16_SWAP(v->float16val);
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -401,6 +409,7 @@ static __inline ujoError _ujo_reader_parse_float32(ujo_reader *r, ujo_element *v
 	ujoError err;
 
 	return_on_err(_ujo_reader_get_data(r,&(v->float32val), sizeof(float32_t)));
+	v->float32val = UJO_FLOAT32_SWAP(v->float32val);
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -411,6 +420,7 @@ static __inline ujoError _ujo_reader_parse_float64(ujo_reader *r, ujo_element *v
 	ujoError err;
 
 	return_on_err(_ujo_reader_get_data(r,&(v->float64val), sizeof(float64_t)));
+	v->float64val = UJO_FLOAT64_SWAP(v->float64val);
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -421,7 +431,6 @@ static __inline ujoError _ujo_reader_parse_bool(ujo_reader *r, ujo_element *v)
 	ujoError err;
 
 	return_on_err(_ujo_reader_get_data(r,&(v->boolval), sizeof(ujoBool)));
-
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -447,6 +456,7 @@ static __inline ujoError _ujo_reader_parse_uxtime(ujo_reader *r, ujo_element *v)
 	ujoError err;
 
 	return_on_err(_ujo_reader_get_data(r,&(v->uxtime), sizeof(int64_t)));
+	v->uxtime = (int64_t) UJO_FLOAT64_SWAP(v->uxtime);
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -457,6 +467,7 @@ static __inline ujoError _ujo_reader_parse_date(ujo_reader *r, ujo_element *v)
 	ujoError err;
 
 	return_on_err(_ujo_reader_get_data(r,&(v->datetime.year), sizeof(int16_t)));
+	v->datetime.year = (int16_t) UJO_UINT16_SWAP(v->datetime.year);
 	return_on_err(_ujo_reader_get_data(r,&(v->datetime.month), sizeof(uint8_t)));
 	return_on_err(_ujo_reader_get_data(r,&(v->datetime.day), sizeof(uint8_t)));
 
@@ -483,6 +494,7 @@ static __inline ujoError _ujo_reader_parse_timestamp(ujo_reader *r, ujo_element 
 	ujoError err;
 
 	return_on_err(_ujo_reader_get_data(r,&(v->datetime.year), sizeof(int16_t)));
+	v->datetime.year = (int16_t) UJO_UINT16_SWAP(v->datetime.year);
 	return_on_err(_ujo_reader_get_data(r,&(v->datetime.month), sizeof(uint8_t)));
 	return_on_err(_ujo_reader_get_data(r,&(v->datetime.day), sizeof(uint8_t)));
 
@@ -491,6 +503,7 @@ static __inline ujoError _ujo_reader_parse_timestamp(ujo_reader *r, ujo_element 
 	return_on_err(_ujo_reader_get_data(r,&(v->datetime.second), sizeof(uint8_t)));
 
 	return_on_err(_ujo_reader_get_data(r,&(v->datetime.millisecond), sizeof(uint16_t)));
+	v->datetime.millisecond = (int16_t) UJO_UINT16_SWAP(v->datetime.millisecond);
 
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 

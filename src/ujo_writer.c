@@ -32,6 +32,7 @@
 #include "ujo_macros.h"
 #include "ujo_state.h"
 #include "ujo_float.h"
+#include "ujo_endian.h"
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
@@ -355,6 +356,7 @@ ujoError ujo_writer_add_int64(ujo_writer* w, int64_t value)
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
 	return_on_err(_ujo_writer_put_uint8(w, UJO_TYPE_INT64));
+	value = (int64_t) UJO_UINT64_SWAP(value);
 	return_on_err(_ujo_writer_put(w, &value, sizeof(int64_t)));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
@@ -381,6 +383,7 @@ ujoError ujo_writer_add_int32(ujo_writer* w, int32_t value)
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
 	return_on_err(_ujo_writer_put_uint8(w, UJO_TYPE_INT32));
+	value = (int32_t) UJO_UINT32_SWAP(value);
 	return_on_err(_ujo_writer_put(w, &value, sizeof(int32_t)));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
@@ -407,6 +410,7 @@ ujoError ujo_writer_add_int16(ujo_writer* w, int16_t value)
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
 	return_on_err(_ujo_writer_put_uint8(w, UJO_TYPE_INT16));
+	value = (int16_t) UJO_UINT16_SWAP(value);
 	return_on_err(_ujo_writer_put(w, &value, sizeof(int16_t)));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
@@ -523,6 +527,7 @@ ujoError ujo_writer_add_float16(ujo_writer* w, float32_t value)
 	}
 
 	return_on_err(_ujo_writer_put_uint8(w, UJO_TYPE_FLOAT16));
+	hValue = (float16_t) UJO_UINT16_SWAP(hValue);
 	return_on_err(_ujo_writer_put(w, &hValue, sizeof(float16_t)));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
@@ -549,6 +554,7 @@ ujoError ujo_writer_add_float32(ujo_writer* w, float32_t value)
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
 	return_on_err(_ujo_writer_put_uint8(w, UJO_TYPE_FLOAT32));
+	value = (float32_t) UJO_FLOAT32_SWAP(value);
 	return_on_err(_ujo_writer_put(w, &value, sizeof(float32_t)));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
@@ -575,6 +581,7 @@ ujoError ujo_writer_add_float64(ujo_writer* w, float64_t value)
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
 	return_on_err(_ujo_writer_put_uint8(w, UJO_TYPE_FLOAT64));
+	value = (float64_t) UJO_FLOAT64_SWAP(value);
 	return_on_err(_ujo_writer_put(w, &value, sizeof(float64_t)));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
@@ -625,6 +632,7 @@ ujoError ujo_writer_add_uint64(ujo_writer* w, uint64_t value)
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
 	return_on_err(_ujo_writer_put_uint8(w, UJO_TYPE_UINT64));
+	value = (uint64_t) UJO_UINT64_SWAP(value);
 	return_on_err(_ujo_writer_put(w, &value, sizeof(uint64_t)));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
@@ -651,6 +659,7 @@ ujoError ujo_writer_add_uint32(ujo_writer* w, uint32_t value)
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
 	return_on_err(_ujo_writer_put_uint8(w, UJO_TYPE_UINT32));
+	value = (uint32_t) UJO_UINT32_SWAP(value);
 	return_on_err(_ujo_writer_put(w, &value, sizeof(uint32_t)));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
@@ -677,6 +686,7 @@ ujoError ujo_writer_add_uint16(ujo_writer* w, uint16_t value)
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
 	return_on_err(_ujo_writer_put_uint8(w, UJO_TYPE_UINT16));
+	value = (uint16_t) UJO_UINT16_SWAP(value);
 	return_on_err(_ujo_writer_put(w, &value, sizeof(uint16_t)));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
@@ -731,6 +741,7 @@ ujoError ujo_writer_add_uxtime(ujo_writer* w, int64_t t)
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
 	return_on_err(_ujo_writer_put_uint8(w, UJO_TYPE_UX_TIME));
+	t = (int64_t) UJO_UINT64_SWAP(t);
 	return_on_err(_ujo_writer_put(w, &t, sizeof(int64_t)));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
@@ -753,11 +764,13 @@ ujoError ujo_writer_add_uxtime(ujo_writer* w, int64_t t)
 ujoError ujo_writer_add_date(ujo_writer* w, const ujoDateTime dt)
 {
 	ujoError err;
+	int16_t i16_year;
 
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
 	return_on_err(_ujo_writer_put_uint8(w, UJO_TYPE_DATE));
-	return_on_err(_ujo_writer_put(w, &dt.year, sizeof(int16_t)));
+	i16_year = (int16_t) UJO_UINT16_SWAP(dt.year);
+	return_on_err(_ujo_writer_put(w, &i16_year, sizeof(int16_t)));
 	return_on_err(_ujo_writer_put(w, &dt.month, sizeof(uint8_t)));
 	return_on_err(_ujo_writer_put(w, &dt.day, sizeof(uint8_t)));
 
@@ -812,12 +825,14 @@ ujoError ujo_writer_add_time(ujo_writer* w, const ujoDateTime dt)
 ujoError ujo_writer_add_timestamp(ujo_writer* w, const ujoDateTime dt)
 {
 	ujoError err;
+	int16_t i16_temp;
 
 	report_error(ujo_state_allow_atomic(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 
 	return_on_err(_ujo_writer_put_uint8(w, UJO_TYPE_TIMESTAMP));
 
-	return_on_err(_ujo_writer_put(w, &dt.year, sizeof(int16_t)));
+	i16_temp = (int16_t) UJO_UINT16_SWAP(dt.year);
+	return_on_err(_ujo_writer_put(w, &i16_temp, sizeof(int16_t)));
 	return_on_err(_ujo_writer_put(w, &dt.month, sizeof(uint8_t)));
 	return_on_err(_ujo_writer_put(w, &dt.day, sizeof(uint8_t)));
 
@@ -825,6 +840,7 @@ ujoError ujo_writer_add_timestamp(ujo_writer* w, const ujoDateTime dt)
 	return_on_err(_ujo_writer_put(w, &dt.minute, sizeof(uint8_t)));
 	return_on_err(_ujo_writer_put(w, &dt.second, sizeof(uint8_t)));
 
+	i16_temp = (int16_t) UJO_UINT16_SWAP(dt.millisecond);
 	return_on_err(_ujo_writer_put(w, &dt.millisecond, sizeof(uint16_t)));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);

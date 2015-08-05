@@ -1,0 +1,9 @@
+#ifndef _UJO_CONFIG_H
+#define _UJO_CONFIG_H
+
+/*
+ * Little Endian = 1234, Big Endian = 4321
+ */
+#define UJO_BYTE_ORDER @UJO_BYTE_ORDER@
+
+#endif // _UJO_CONFIG_H

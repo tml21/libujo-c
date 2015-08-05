@@ -32,12 +32,15 @@
 cmake_minimum_required(VERSION 3.1)
 project (ujo)
 
+include(TestBigEndian)
+
 #######################################################
 ## set build parameter
 #######################################################
 SET (UJO_TARGET_PLATFORM win_x86-64 CACHE STRING "set the build target")
 #######################################################
 
+set (SOURCE_DIR "${PROJECT_SOURCE_DIR}/")
   
 set (UJO_MAJOR_VERSION 0) 
 set (UJO_MINOR_VERSION 9)
@@ -49,6 +52,21 @@ include (InstallRequiredSystemLibraries)
 set (CPACK_PACKAGE_VERSION_MAJOR "${UJO_MAJOR_VERSION}")
 set (CPACK_PACKAGE_VERSION_MINOR "${UJO_MINOR_VERSION}")
 set (PLATFORM_FOUND false)
+
+TEST_BIG_ENDIAN(UJO_BIG_ENDIAN)
+
+if (UJO_BIG_ENDIAN)
+   set (UJO_BYTE_ORDER 4321)
+else ()
+   set (UJO_BYTE_ORDER 1234)
+endif ()
+
+configure_file (
+   "${SOURCE_DIR}/src/ujo_config.h.in"
+   "${SOURCE_DIR}/src/ujo_config.h"
+)
+
+
 
 #######################################################
 ## Windows 32 bit
