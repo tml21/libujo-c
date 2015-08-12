@@ -841,7 +841,7 @@ ujoError ujo_writer_add_timestamp(ujo_writer* w, const ujoDateTime dt)
 	return_on_err(_ujo_writer_put(w, &dt.second, sizeof(uint8_t)));
 
 	i16_temp = (int16_t) UJO_UINT16_SWAP(dt.millisecond);
-	return_on_err(_ujo_writer_put(w, &dt.millisecond, sizeof(uint16_t)));
+	return_on_err(_ujo_writer_put(w, &i16_temp, sizeof(uint16_t)));
 
 	w->state = ujo_state_switch(ATOMIC_FOUND, w->state, w->state_stack);
 
@@ -1159,6 +1159,7 @@ ujoError _ujo_writer_put_uint8(ujo_writer* w, uint8_t value)
 
 ujoError _ujo_writer_put_uint16(ujo_writer* w, uint16_t value)
 {
+    value = UJO_UINT16_SWAP(value);
 	return _ujo_writer_put(w, &value, sizeof(uint16_t));
 };
 

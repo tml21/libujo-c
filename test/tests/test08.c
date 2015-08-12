@@ -91,16 +91,16 @@ ujoBool test08()
 	err = ujo_writer_list_open(ujow);
 	print_return_ujo_err(err,"ujo_writer_list_open"); 
 
-	err = ujo_writer_add_int8(ujow, 130);
+	err = ujo_writer_add_int8(ujow, 0x01);
 	print_return_ujo_err(err,"ujo_writer_add_int8"); 
 
-	err = ujo_writer_add_int16(ujow, 1024);
+	err = ujo_writer_add_int16(ujow, 0x0102);
 	print_return_ujo_err(err,"ujo_writer_add_int16"); 
 
-	err = ujo_writer_add_int32(ujow, 12345678);
+	err = ujo_writer_add_int32(ujow, 0x01020304);
 	print_return_ujo_err(err,"ujo_writer_add_int32"); 
 
-	err = ujo_writer_add_int64(ujow, 12345678);
+	err = ujo_writer_add_int64(ujow, 0x0102030405060708);
 	print_return_ujo_err(err,"ujo_writer_add_int64"); 
 
 	err = ujo_writer_list_close(ujow);
@@ -115,7 +115,7 @@ ujoBool test08()
 	bin_to_str(data, binstring, datasize);
 
 	printf("%s\n", binstring);
-	print_return_expr_fail(strcmp("5f554a4f010000300882070004064e61bc00054e61bc000000000000",binstring) == 0,"int integrity failed");
+	print_return_expr_fail(strcmp("5f554a4f010000300801070201060403020105080706050403020100",binstring) == 0,"int integrity failed");
 	free(binstring);
 
 	err = ujo_free_writer(ujow);

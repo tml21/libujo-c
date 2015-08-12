@@ -43,6 +43,7 @@
 #include "stdio.h"
 #include "ujo_types.h"
 #include "ujo_config.h"
+#include "ujo_float.h"
 
 BEGIN_C_DECLS
 

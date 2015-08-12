@@ -281,6 +281,7 @@ static __inline ujoError _ujo_reader_parse_header(ujo_reader *r)
 
 	// get version
 	return_on_err(_ujo_reader_get_data(r,&(r->header.version), sizeof(uint16_t)));
+	r->header.version = UJO_UINT16_SWAP(r->header.version);
 	report_error(r->header.version == 1, "unsupported UJO version", UJO_ERR_INVALID_DATA);
 
 	// compression
@@ -456,7 +457,7 @@ static __inline ujoError _ujo_reader_parse_uxtime(ujo_reader *r, ujo_element *v)
 	ujoError err;
 
 	return_on_err(_ujo_reader_get_data(r,&(v->uxtime), sizeof(int64_t)));
-	v->uxtime = (int64_t) UJO_FLOAT64_SWAP(v->uxtime);
+	v->uxtime = UJO_UINT64_SWAP(v->uxtime);
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
@@ -1110,7 +1111,7 @@ ujoError ujo_element_get_type(ujo_element* e, ujoTypeId* value)
  */
 ujoError ujo_element_get_uxtime(ujo_element* e, int64_t* value) 
 {
-	report_error(e, "invalid handle", UJO_ERR_INVALID_DATA);
+    report_error(e, "invalid handle", UJO_ERR_INVALID_DATA);
 	report_error(e->type == UJO_TYPE_UX_TIME, "element type mismatch", UJO_ERR_INVALID_DATA);
 
 	*value = e->uxtime;

@@ -58,7 +58,6 @@ set  (UJO_SOURCES
       "ujo_reader.c"
       "ujo_state.c"
   	  "ujo_float.c"
-  	  "ujo_endian.c"
 	    "ujo_libujo.def")
 
 source_group("Headerfiles" FILES ${UJO_SOURCES_HEADER})
