@@ -81,7 +81,9 @@ static __inline float32_t _ujo_float32_swap (float32_t value)
     union {
         uint32_t ui32;
         float32_t f32;
-    } union_swap = { .f32 = value};
+    } union_swap;
+
+	union_swap.f32  = value;
 
     union_swap.ui32 = _ujo_uint32_swap(union_swap.ui32);
 
@@ -93,8 +95,9 @@ static __inline float64_t _ujo_float64_swap (float64_t value)
     union {
         uint64_t ui64;
         float64_t f64;
-    } union_swap = { .f64 = value};
+    } union_swap;
 
+	union_swap.f64  = value;
     union_swap.ui64 = _ujo_uint64_swap(union_swap.ui64);
 
     return union_swap.f64;
