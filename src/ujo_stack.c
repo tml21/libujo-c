@@ -56,7 +56,7 @@ ujoBool ujo_stack_is_empty(ujoStack* stack)
 {
 	return_val_if_fail(stack,"invalid pointer",ujoFalse);
 
-	return (stack->items == 0);
+	return (ujoBool)(stack->items == 0);
 }
 
 void ujo_clear_stack(ujoStack* stack)

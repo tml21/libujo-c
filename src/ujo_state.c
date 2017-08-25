@@ -29,7 +29,7 @@
 
 ujoBool ujo_state_allow_atomic(ujoDocState s)
 {
-	return (s == STATE_DICT_KEY || 
+	return (ujoBool)(s == STATE_DICT_KEY ||
 		    s == STATE_DICT_VALUE ||
 			s == STATE_LIST ||
 			s == STATE_TABLE_VALUES);
@@ -37,7 +37,7 @@ ujoBool ujo_state_allow_atomic(ujoDocState s)
 
 ujoBool ujo_state_allow_container(ujoDocState s)
 {
-	return (s == STATE_ROOT || 
+	return (ujoBool)(s == STATE_ROOT ||
 		    s == STATE_DICT_VALUE ||
 			s == STATE_LIST ||
 			s == STATE_TABLE_VALUES);
@@ -45,7 +45,7 @@ ujoBool ujo_state_allow_container(ujoDocState s)
 
 ujoBool ujo_state_allow_string(ujoDocState s)
 {
-	return (ujo_state_allow_atomic(s) ||
+	return (ujoBool)(ujo_state_allow_atomic(s) ||
 		    s == STATE_TABLE_COLUMNS);
 };
 
