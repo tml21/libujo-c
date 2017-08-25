@@ -246,6 +246,8 @@ ujoError ujo_free_reader(ujo_reader* r)
 	case UJO_FILE:
 		fclose(r->file);
 		break;
+	default:
+		break;
 	}
 	
 	ujo_free(r);
@@ -592,6 +594,9 @@ ujoError _ujo_reader_get_data(ujo_reader* r, void* sequence, size_t bytes)
 		break;
 	case UJO_FILE:
 		err = _ujo_reader_get_file_data(r, sequence, bytes);
+		break;
+	default:
+		break;
 	}
 	return err;
 }

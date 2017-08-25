@@ -78,10 +78,8 @@ ujo_state* ujo_state_switch(ujoDocEvent e, ujo_state* s, ujoStack *stack)
 		switch (s->state) {
                   case STATE_DICT_VALUE: 
 					   return ujo_state_prev(s, stack);
-                       break;
                   case STATE_DICT_KEY: 
 					   return ujo_state_next(STATE_DICT_VALUE, s, stack); 
-                       break;
 				  case STATE_TABLE_VALUES:
 					   s->table.column += 1;
 					   if (s->table.column >= s->table.columns)
@@ -95,10 +93,8 @@ ujo_state* ujo_state_switch(ujoDocEvent e, ujo_state* s, ujoStack *stack)
 		switch (s->state) {
                   case STATE_DICT_VALUE: 
 					   return ujo_state_prev(s, stack);
-                       break;
                   case STATE_DICT_KEY: 
 					   return ujo_state_next(STATE_DICT_VALUE, s, stack); 
-                       break;
 				  case STATE_TABLE_COLUMNS:
 					   s->table.columns += 1;
 					   break;
@@ -114,8 +110,7 @@ ujo_state* ujo_state_switch(ujoDocEvent e, ujo_state* s, ujoStack *stack)
 	  case CONTAINER_CLOSED: 
 		       switch (s->state) {
 			   case STATE_DICT_VALUE: 
-				   return ujo_state_prev(s, stack); 
-				   break;
+				   return ujo_state_prev(s, stack);
 			   case STATE_TABLE_VALUES:
 				   s->table.column += 1;
 				   if (s->table.column >= s->table.columns)

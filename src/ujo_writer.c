@@ -177,6 +177,8 @@ ujoError ujo_free_writer(ujo_writer* w)
 	case UJO_FILE:
 		fclose(w->file);
 		break;
+	default:
+		break;
 	}
 
 	ujo_free(w);
@@ -1148,6 +1150,9 @@ ujoError _ujo_writer_put(ujo_writer* w, const void* sequence, size_t bytes)
 		break;
 	case UJO_FILE:
 		err = _ujo_writer_put_file(w, sequence, bytes);
+		break;
+	default:
+		break;
 	}
 	return err;
 }
