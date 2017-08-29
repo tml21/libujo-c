@@ -40,7 +40,7 @@
 /**
  * print a buffer content to the console
  */
-void print_buffer(unsigned char *buffer, uint64_t size) 
+void print_buffer(ujoByte *buffer, uint64_t size)
 {
 	uint64_t cur = 0;
 	uint64_t i;
@@ -55,14 +55,14 @@ void print_buffer(unsigned char *buffer, uint64_t size)
 			} 
 			else
 			{
-				printf("%02x ", buffer[i]);
+				printf("%02x ", (unsigned int)buffer[i]);
 			}
 		}
 		for (i=cur; i<cur+16; i++)
 		{
 			if (i >= size) break;
-			if ((buffer[i] <= 127) && (buffer[i] >= 32)) { 
-				printf("%c", buffer[i]);
+			if ((buffer[i] <= (ujoByte)127) && (buffer[i] >= (ujoByte)32)) {
+				printf("%c", (unsigned char)buffer[i]);
 			} else {
 				printf(".");
 			}
@@ -74,17 +74,17 @@ void print_buffer(unsigned char *buffer, uint64_t size)
 	printf("%lli bytes printed\n", size);
 }
 
-void bin_to_str(unsigned char *inbuffer, char* outbuffer, uint64_t size)
+void bin_to_str(ujoByte *inbuffer, char* outbuffer, uint64_t size)
 {
 	uint64_t i;
 	char conv[10];
 
 	for (i=0; i<size; i++)
 	{
-		sprintf(conv, "%02x ", inbuffer[i]);
+		sprintf(conv, "%02x ", (unsigned int)inbuffer[i]);
 		memcpy(outbuffer+i*2, conv, 2);
 	}
-	outbuffer[size*2] = 0x00;
+	outbuffer[size*2] = (char)0x00;
 };
 // ---------------------------- helper functions ---------------------------
 size_t get_write_buffer_size(ujo_writer* w)
@@ -172,13 +172,13 @@ ujoError myOnElement (ujo_element *element, /*@unused@*/ ujoPointer data){
 				printf("None found\n");
 				break;
 			case UJO_TYPE_FLOAT32:
-        f32Val = -1.0;
+        f32Val = (float32_t) -1.0;
 			  err = ujo_element_get_float32(element, &f32Val);
 			  print_return_ujo_err(err,"ujo_element_get_float32");
         printf("float32 \"%lf\"found\n", f32Val);
 				break;
             case UJO_TYPE_FLOAT16:
-        f32Val = -1.0;
+        f32Val = (float32_t) -1.0;
               err = ujo_element_get_float16(element, &f32Val);
               print_return_ujo_err(err,"ujo_element_get_float16");
         printf("float16 \"%lf\"found\n", f32Val);
@@ -193,7 +193,7 @@ ujoError myOnElement (ujo_element *element, /*@unused@*/ ujoPointer data){
         bVal = ujoFalse;
 			  err = ujo_element_get_bool(element, &bVal);
 			  print_return_ujo_err(err,"ujo_element_get_bool");
-        printf("bool \"%d\"found\n", bVal == ujoTrue);
+        printf("bool \"%d\"found\n", (int)(bVal == ujoTrue));
 				break;
 			case UJO_TYPE_STRING:
 			  err = ujo_element_get_string_type(element, &stype);

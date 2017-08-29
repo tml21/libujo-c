@@ -71,7 +71,7 @@
  #define INT64_MIN INT64_C (-9223372036854775808)
 #endif
 
-#if !defined (UINT64_MAX) && defined (INT64_C)
+#if !defined (UINT64_MAX) && defined (UINT64_C)
  #define UINT64_MAX UINT64_C (18446744073709551615)
 #endif
 

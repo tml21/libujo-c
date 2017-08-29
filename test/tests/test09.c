@@ -53,10 +53,10 @@ ujoBool test09()
 	err = ujo_writer_list_open(ujow);
 	print_return_ujo_err(err,"ujo_writer_list_open"); 
 
-	err = ujo_writer_add_float16(ujow, 24.135);
+	err = ujo_writer_add_float16(ujow, (float32_t)24.135);
 	print_return_ujo_err(err,"ujo_writer_add_float16");
 
-	err = ujo_writer_add_float32(ujow, 3.14);
+	err = ujo_writer_add_float32(ujow, (float32_t)3.14);
 	print_return_ujo_err(err,"ujo_writer_add_float32"); 
 
 	err = ujo_writer_add_float64(ujow, 3.14);
