@@ -1,0 +1,29 @@
+node ('LINUX-SLAVE') {
+	checkout scm
+    stage 'build'
+        sh '''mkdir build
+        cd build
+        cmake .. -G "Unix Makefiles" -DUJO_TARGET_PLATFORM=linux_x86-64
+        cmake --build . --clean-first'''
+
+    try {
+        stage 'splint-check'
+            sh "splint +posixlib -boolops -predboolint -nullret -macrounrecog -varuse -temptrans +matchanyintegral -retvalother -predboolothers -retvalint +longunsignedintegral -mustfreeonly -compdef -dependenttrans -branchstate -usedef  -nullstate -mustfreefresh -onlytrans -usereleased -mayaliasunique -bufferoverflowhigh -nullderef -duplicatequals -nullpass -exportlocal -DENV64BIT -DLINUX -DWRITE_DEBUG_LOG -Dujo11_64_EXPORTS -I/usr/include/ -I$WORKSPACE/src/ -I$WORKSPACE/test/tests/ -I$WORKSPACE/test/ $WORKSPACE/src/*.c $WORKSPACE/test/*.c $WORKSPACE/test/tests/*.c"
+    }catch(e) {
+        echo "Failed: ${e}"
+	}
+			
+	try {
+		stage 'flawfinder'
+			sh "flawfinder $WORKSPACE"
+	}catch(e) {
+		echo "Failed: ${e}"
+    } 
+    
+    finally {       
+    stage 'test'
+        sh '''cd $WORKSPACE/build/linux_x86-64/test
+        ./testujo64'''
+        
+}
+}
