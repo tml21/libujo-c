@@ -122,7 +122,7 @@ uint8_t* get_pseudo_bin(uint32_t n)
 /**
  * myOnElement: Callback method for ujo_reader_set_on_element
  */
-ujoError myOnElement (ujo_element *element, ujoPointer data){
+ujoError myOnElement (ujo_element *element, /*@unused@*/ ujoPointer data){
   ujoBool    bVal;
   int64_t i64Val;
   int32_t i32Val;

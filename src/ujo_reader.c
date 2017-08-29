@@ -290,19 +290,19 @@ static __inline ujoError _ujo_reader_parse_header(ujo_reader *r)
 	return UJO_SUCCESS;
 }
 
-static __inline ujoError _ujo_reader_open_list(ujo_reader *r, ujo_element *v)
+static __inline ujoError _ujo_reader_open_list(ujo_reader *r, /*@unused@*/ ujo_element *v)
 {
 	r->state = ujo_state_next(STATE_LIST, r->state, r->state_stack);
 	return UJO_SUCCESS;
 }
 
-static __inline ujoError _ujo_reader_open_map(ujo_reader *r, ujo_element *v)
+static __inline ujoError _ujo_reader_open_map(ujo_reader *r, /*@unused@*/ ujo_element *v)
 {
 	r->state = ujo_state_next(STATE_DICT_KEY, r->state, r->state_stack);
 	return UJO_SUCCESS;
 };
 
-static __inline ujoError _ujo_reader_open_table(ujo_reader *r, ujo_element *v)
+static __inline ujoError _ujo_reader_open_table(ujo_reader *r, /*@unused@*/ ujo_element *v)
 {
 	r->state = ujo_state_next(STATE_TABLE_COLUMNS, r->state, r->state_stack);
 	return UJO_SUCCESS;
@@ -437,14 +437,14 @@ static __inline ujoError _ujo_reader_parse_bool(ujo_reader *r, ujo_element *v)
 	return UJO_SUCCESS;
 };
 
-static __inline ujoError _ujo_reader_parse_none(ujo_reader *r, ujo_element *v)
+static __inline ujoError _ujo_reader_parse_none(ujo_reader *r, /*@unused@*/ ujo_element *v)
 {
 	r->state = ujo_state_switch(ATOMIC_FOUND, r->state, r->state_stack);
 
 	return UJO_SUCCESS;
 };
 
-static __inline ujoError _ujo_reader_close_container(ujo_reader *r, ujo_element *v)
+static __inline ujoError _ujo_reader_close_container(ujo_reader *r, /*@unused@*/ ujo_element *v)
 {
 	r->state = ujo_state_prev(r->state, r->state_stack);
     r->state = ujo_state_switch(CONTAINER_CLOSED, r->state, r->state_stack);

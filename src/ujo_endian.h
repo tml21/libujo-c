@@ -50,13 +50,13 @@ BEGIN_C_DECLS
 #define UJO_LITTLE_ENDIAN 1234
 #define UJO_BIG_ENDIAN 4321
 
-static __inline uint16_t _ujo_uint16_swap (uint16_t value)
+static __inline uint16_t /*@unused@*/ _ujo_uint16_swap (uint16_t value)
 {
     return ((value & 0x00FF) << 8) |
            ((value & 0xFF00) >> 8);
 }
 
-static __inline uint32_t _ujo_uint32_swap (uint32_t value)
+static __inline uint32_t /*@unused@*/ _ujo_uint32_swap (uint32_t value)
 {
     return ((value & 0x000000FFU) << 24) |
            ((value & 0x0000FF00U) <<  8) |
@@ -76,7 +76,7 @@ static __inline uint64_t _ujo_uint64_swap (uint64_t value)
            ((value & 0xFF00000000000000ULL) >> 56);
 }
 
-static __inline float32_t _ujo_float32_swap (float32_t value)
+static __inline float32_t /*@unused@*/ _ujo_float32_swap (float32_t value)
 {
     union {
         uint32_t ui32;
@@ -90,7 +90,7 @@ static __inline float32_t _ujo_float32_swap (float32_t value)
     return union_swap.f32;
 }
 
-static __inline float64_t _ujo_float64_swap (float64_t value)
+static __inline float64_t /*@unused@*/ _ujo_float64_swap (float64_t value)
 {
     union {
         uint64_t ui64;
