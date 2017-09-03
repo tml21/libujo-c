@@ -75,7 +75,8 @@ ujoBool test08()
 	print_buffer(data, datasize);
 
 	binstring = (char*)calloc(datasize*2+1, 1);
-	bin_to_str(data, binstring, datasize);
+	err = bin_to_str(data, binstring, datasize);
+	print_return_ujo_err(err, "bin_to_str");
 
 	printf("%s\n", binstring);
 	print_return_expr_fail(strcmp("5f554a4f0100003003214402c3f54840011f85eb51b81e094000",binstring) == 0,"float integrity failed");
@@ -112,7 +113,8 @@ ujoBool test08()
 	print_buffer(data, datasize);
 
 	binstring = (char*)calloc(datasize*2+1, 1);
-	bin_to_str(data, binstring, datasize);
+	err = bin_to_str(data, binstring, datasize);
+	print_return_ujo_err(err, "bin_to_str");
 
 	printf("%s\n", binstring);
 	print_return_expr_fail(strcmp("5f554a4f010000300801070201060403020105080706050403020100",binstring) == 0,"int integrity failed");

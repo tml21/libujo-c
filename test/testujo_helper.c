@@ -74,17 +74,22 @@ void print_buffer(ujoByte *buffer, uint64_t size)
 	printf("%lli bytes printed\n", size);
 }
 
-void bin_to_str(ujoByte *inbuffer, char* outbuffer, uint64_t size)
+ujoError bin_to_str(ujoByte *inbuffer, char* outbuffer, uint64_t size)
 {
 	uint64_t i;
 	char conv[10];
 
 	for (i=0; i<size; i++)
 	{
-		sprintf(conv, "%02x ", (unsigned int)inbuffer[i]);
+		if(snprintf(conv,sizeof(conv), "%02x ", (unsigned int)inbuffer[i])==-1)
+		{
+		 printf("%s : Buffer size exceeded ",__func__);
+		 return UJO_ERR_UNKNOWN;
+		}
 		memcpy(outbuffer+i*2, conv, 2);
 	}
 	outbuffer[size*2] = (char)0x00;
+	return UJO_SUCCESS;
 };
 // ---------------------------- helper functions ---------------------------
 size_t get_write_buffer_size(ujo_writer* w)

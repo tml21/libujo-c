@@ -52,7 +52,7 @@ if (!(exp)) {printf(#message"\n"); return ujoFalse;}
  */
 void print_buffer(ujoByte* buffer, uint64_t size);
 
-void bin_to_str(ujoByte* inbuffer, char* outbuffer, uint64_t size);
+ujoError bin_to_str(ujoByte* inbuffer, char* outbuffer, uint64_t size);
 
 size_t get_write_buffer_size(ujo_writer* w);
 
