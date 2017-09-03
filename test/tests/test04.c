@@ -66,7 +66,7 @@ ujoBool test04()
 
 	    // c_string
 		datasize = get_write_buffer_size(ujow);
-		err = ujo_writer_add_string_c(ujow, TEST_CSTR);
+		err = ujo_writer_add_string_c(ujow, TEST_CSTR, sizeof(TEST_CSTR));
 		print_return_ujo_err(err,"ujo_writer_add_string_c"); 
 
 	err = ujo_writer_list_close(ujow);

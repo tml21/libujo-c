@@ -94,7 +94,7 @@ BEGIN_C_DECLS
 	ujoError ujo_writer_add_bool(ujo_writer* w, ujoBool value);
 
 	// string
-	ujoError ujo_writer_add_string_c(ujo_writer* w, const char* s);
+	ujoError ujo_writer_add_string_c(ujo_writer* w, const char* s, size_t n);
 	ujoError ujo_writer_add_string_u8(ujo_writer* w, const uint8_t* s, size_t n);
 	ujoError ujo_writer_add_string_u16(ujo_writer* w, const uint16_t* s, size_t n);
 	ujoError ujo_writer_add_string_u32(ujo_writer* w, const uint32_t* s, size_t n);

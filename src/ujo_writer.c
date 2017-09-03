@@ -108,7 +108,7 @@ ujoError ujo_new_memory_writer(ujo_writer** w)
 	newhdl->buffer = ujo_new(ujoByte, UJO_DEFAULT_BUFSIZE);
 	newhdl->buffersize = UJO_DEFAULT_BUFSIZE;
 
-	return_on_err(_ujo_writer_put(newhdl, UJO_MAGIC, strlen(UJO_MAGIC)));
+	return_on_err(_ujo_writer_put(newhdl, UJO_MAGIC, strnlen(UJO_MAGIC, sizeof(UJO_MAGIC))));
 	return_on_err(_ujo_writer_put_uint16(newhdl, UJO_DATA_VERSION));
 	return_on_err(_ujo_writer_put_uint8(newhdl, UJO_COMPRESS_NONE));
 
@@ -143,7 +143,7 @@ ujoError ujo_new_file_writer(ujo_writer** w, const char* filename)
 	newhdl->type = UJO_FILE; 
 	newhdl-> file = filehandle;
 
-	return_on_err(_ujo_writer_put(newhdl, UJO_MAGIC, strlen(UJO_MAGIC)));
+	return_on_err(_ujo_writer_put(newhdl, UJO_MAGIC,  strnlen(UJO_MAGIC, sizeof(UJO_MAGIC))));
 	return_on_err(_ujo_writer_put_uint16(newhdl, UJO_DATA_VERSION));
 	return_on_err(_ujo_writer_put_uint8(newhdl, UJO_COMPRESS_NONE));
 
@@ -858,15 +858,16 @@ ujoError ujo_writer_add_timestamp(ujo_writer* w, const ujoDateTime dt)
  *
  * @param w    ujo writer handle
  * @param s    array with string
+ * @param n    Length of the string
  *
  * @return UJO error code or UJO_SUCCESS
  * @sa ujo_writer_add_string_u8, ujo_writer_add_string_u16, ujo_writer_add_string_u32,
  * ujo_element_get_string_c
  */
-ujoError ujo_writer_add_string_c(ujo_writer* w, const char* s)
+ujoError ujo_writer_add_string_c(ujo_writer* w, const char* s, size_t n)
 {
 	ujoError err;
-	uint32_t units = (uint32_t)(strlen(s)+1);
+	uint32_t units = (uint32_t)(strnlen(s, n)+1);
 
 	report_error(ujo_state_allow_string(w->state->state),"value not allowed", UJO_ERR_TYPE_MISPLACED);
 

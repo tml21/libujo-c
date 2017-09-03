@@ -57,30 +57,30 @@ ujoBool test06()
 	err = ujo_writer_table_open(ujow);
 	print_return_ujo_err(err,"ujo_writer_table_open"); 
 
-	err = ujo_writer_add_string_c(ujow, "Name");
+	err = ujo_writer_add_string_c(ujow, "Name", sizeof("Name"));
 	print_return_ujo_err(err,"ujo_writer_add_string_c"); 
 
-	err = ujo_writer_add_string_c(ujow, "Age");
+	err = ujo_writer_add_string_c(ujow, "Age", sizeof("Age"));
 	print_return_ujo_err(err,"ujo_writer_add_string_c"); 
 
-	err = ujo_writer_add_string_c(ujow, "Phone");
+	err = ujo_writer_add_string_c(ujow, "Phone", sizeof("Phone"));
 	print_return_ujo_err(err,"ujo_writer_add_string_c"); 
 
 	err = ujo_writer_table_end_columns(ujow);
 	print_return_ujo_err(err,"ujo_writer_table_end_columns"); 
 
 	// add first row
-	err = ujo_writer_add_string_c(ujow,"Maik");
+	err = ujo_writer_add_string_c(ujow,"Maik", sizeof("Maik"));
 	print_return_ujo_err(err,"ujo_writer_add_string_c"); 
 
 	err = ujo_writer_add_int8(ujow,23);
 	print_return_ujo_err(err,"ujo_writer_add_int8"); 
 
-	err = ujo_writer_add_string_c(ujow,"+49 0431 1234");
+	err = ujo_writer_add_string_c(ujow,"+49 0431 1234", sizeof("+49 0431 1234"));
 	print_return_ujo_err(err,"ujo_writer_add_string_c"); 
 
 	// add second row
-	err = ujo_writer_add_string_c(ujow,"Stefan");
+	err = ujo_writer_add_string_c(ujow,"Stefan", sizeof("Stefan"));
 	print_return_ujo_err(err,"ujo_writer_add_string_c"); 
 
 	err = ujo_writer_add_int8(ujow,36);
@@ -91,13 +91,13 @@ ujoBool test06()
 	err = ujo_writer_list_open(ujow);
 	print_return_ujo_err(err,"ujo_writer_list_open"); 
  
-	err = ujo_writer_add_string_c(ujow,"+49 0431 1234");
+	err = ujo_writer_add_string_c(ujow,"+49 0431 1234", sizeof("+49 0431 1234"));
 	print_return_ujo_err(err,"ujo_writer_add_string_c"); 
 
-	err = ujo_writer_add_string_c(ujow,"+49 127 87917");
+	err = ujo_writer_add_string_c(ujow,"+49 127 87917", sizeof("+49 127 87917"));
 	print_return_ujo_err(err,"ujo_writer_add_string_c"); 
 
-	err = ujo_writer_add_string_c(ujow,"+49 3456789");
+	err = ujo_writer_add_string_c(ujow,"+49 3456789", sizeof("+49 3456789"));
 	print_return_ujo_err(err,"ujo_writer_add_string_c"); 
 
 	err = ujo_writer_list_close(ujow);
